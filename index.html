@@ -65,8 +65,6 @@
             flex: 1;
             overflow-y: auto;
             padding-right: 10px;
-            z-index: 2;
-            position: relative;
         }
 
         .page-image {
@@ -97,20 +95,20 @@
         }
 
         h2 {
-            font-size: 2rem;
+            font-size: 1.8rem;
         }
 
         p {
-            font-size: 1.3rem;
-            line-height: 1.8;
+            font-size: 1.1rem;
+            line-height: 1.7;
             margin-bottom: 15px;
             text-align: justify;
         }
 
         .drop-cap {
             float: left;
-            font-size: 4.5rem;
-            line-height: 3.5rem;
+            font-size: 4rem;
+            line-height: 3rem;
             padding-right: 8px;
             margin-top: -4px;
             font-family: 'Playfair Display', serif;
@@ -123,7 +121,6 @@
             background-color: rgba(141, 110, 99, 0.1);
             border-left: 3px solid #8d6e63;
             margin: 20px 0;
-            font-size: 1.2rem;
         }
 
         .navigation {
@@ -220,11 +217,11 @@
         }
 
         .references {
-            font-size: 1.1rem;
+            font-size: 0.9rem;
         }
 
         .references h2 {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             margin-bottom: 15px;
         }
 
@@ -264,49 +261,6 @@
             margin: 20px 0;
         }
 
-        /* Background image pages */
-        .bg-page {
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
-
-        .bg-page::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1;
-        }
-
-        .bg-page .page-content {
-            position: relative;
-            z-index: 2;
-        }
-
-        .bg-page h1, .bg-page h2 {
-            color: #ffffff;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-        }
-
-        .bg-page p {
-            color: #f5f5f5;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-        }
-
-        .bg-page .drop-cap {
-            color: #ffd54f;
-        }
-
-        .bg-page .scripture {
-            background-color: rgba(255, 255, 255, 0.2);
-            border-left: 3px solid #ffd54f;
-            color: #f5f5f5;
-        }
-
         @media (max-width: 768px) {
             .storybook-container {
                 height: 500px;
@@ -334,7 +288,7 @@
             }
             
             p {
-                font-size: 1.1rem;
+                font-size: 1rem;
             }
         }
     </style>
@@ -349,107 +303,137 @@
         </div>
 
         <!-- Page 1 -->
-        <div class="page bg-page hidden" id="page-1" style="background-image: url('Images/1.png');">
+        <div class="page hidden" id="page-1">
             <div class="page-content">
                 <div class="page-text">
                     <h2>The Prophet's Calling</h2>
                     <p><span class="drop-cap">T</span>he prophet Hosea lived a quiet life, his days filled with prayer and the study of sacred scrolls. His heart was a still pool, reflecting the heavens. But one day, a voice, deep and resonant as thunder, broke the silence. "Go," it commanded. "Take for yourself a wife of harlotry and have children of harlotry, for the land commits great harlotry by forsaking its God."</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\1.png" alt="Hosea in prayer">
+                </div>
             </div>
         </div>
 
         <!-- Page 2 -->
-        <div class="page bg-page hidden" id="page-2" style="background-image: url('Images/2.png');">
+        <div class="page hidden" id="page-2">
             <div class="page-content">
                 <div class="page-text">
                     <h2>Meeting Gomer</h2>
                     <p><span class="drop-cap">H</span>is steps led him to the city's edge, to a house where laughter spilled like cheap wine. There he found Gomer. She was a flame in the darkness, her eyes holding both a desperate hunger and a deep-seated weariness. When Hosea spoke her name and asked for her hand, she laughed, a sound as brittle as dry leaves. But in his gaze, she saw not judgment, but a strange and steady tenderness. She said yes.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\2.png" alt="Hosea meets Gomer">
+                </div>
             </div>
         </div>
 
         <!-- Page 3 -->
-        <div class="page bg-page hidden" id="page-3" style="background-image: url('Images/3.png');">
+        <div class="page hidden" id="page-3">
             <div class="page-content">
                 <div class="page-text">
                     <h2>A Quiet Harbor</h2>
                     <p><span class="drop-cap">F</span>or a time, Hosea's love was a strange and quiet harbor. A son was born to them, a child of their union, and God commanded he be named Jezreel, for a valley of judgment. This firstborn, Hosea's own son, was a prophecy of sorrow, a shadow falling over their new family. But the quiet of Hosea's home felt like a cage to Gomer, and her eyes began to stray back toward the wild, chaotic life she had known.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\3.png" alt="Hosea and Gomer with their son">
+                </div>
             </div>
         </div>
 
         <!-- Page 4 -->
-        <div class="page bg-page hidden" id="page-4" style="background-image: url('Images/4.png');">
+        <div class="page hidden" id="page-4">
             <div class="page-content">
                 <div class="page-text">
                     <h2>The First Betrayal</h2>
                     <p><span class="drop-cap">G</span>omer's restlessness gave way to betrayal. She sought out her old lovers, and soon she bore a daughter, a child not of Hosea's blood. God's voice came again, cold as iron: "Name her Lo-ruhamah, for she is 'Not Pitied,' and I will no longer have pity on my people." The child was a living testament to Gomer's unfaithfulness, a constant pain in Hosea's home.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\4.png" alt="Gomer's betrayal">
+                </div>
             </div>
         </div>
 
         <!-- Page 5 -->
-        <div class="page bg-page hidden" id="page-5" style="background-image: url('Images/5.png');">
+        <div class="page hidden" id="page-5">
             <div class="page-content">
                 <div class="page-text">
                     <h2>Deepening Shame</h2>
                     <p><span class="drop-cap">T</span>he shame deepened. After weaning her daughter, Gomer bore another son, also not of Hosea's line. The command from God was the final, devastating blow: "Name him Lo-ammi, for he is 'Not My People,' and I am not your God." One night, Gomer vanished, leaving Hosea with his son Jezreel and the two children of her unfaithfulness, a house full of broken covenants.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\5.png" alt="Hosea with his children">
+                </div>
             </div>
         </div>
 
         <!-- Page 6 -->
-        <div class="page bg-page hidden" id="page-6" style="background-image: url('Images/6.png');">
+        <div class="page hidden" id="page-6">
             <div class="page-content">
                 <div class="page-text">
                     <h2>A Spectacle of Shame</h2>
                     <p><span class="drop-cap">H</span>osea's life became a spectacle of shame. He raised his own son and the two children of Gomer's adultery alone. Their names were a constant sermon to the townspeople who whispered behind his back. Jezreel, Lo-ruhamah, Lo-ammi. Judgment, No Pity, Not My People. Every time he called to them, he preached his own heartbreak and his nation's sin. His love for them was real, but it was a love steeped in grief.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\6.png" alt="Hosea's shame">
+                </div>
             </div>
         </div>
 
         <!-- Page 7 -->
-        <div class="page bg-page hidden" id="page-7" style="background-image: url('Images/7.png');">
+        <div class="page hidden" id="page-7">
             <div class="page-content">
                 <div class="page-text">
                     <h2>Years Passed</h2>
                     <p><span class="drop-cap">Y</span>ears passed. Gomer's beauty, once a burning torch, faded to a guttering wick. The men who had desired her grew tired of her. She fell into debt, her freedom sold to settle her accounts. She became a possession, passed from one master to another, her spirit worn as thin as her ragged clothes.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\7.png" alt="Gomer's decline">
+                </div>
             </div>
         </div>
 
         <!-- Page 8 -->
-        <div class="page bg-page hidden" id="page-8" style="background-image: url('Images/8.png');">
+        <div class="page hidden" id="page-8">
             <div class="page-content">
                 <div class="page-text">
                     <h2>The Second Command</h2>
                     <p><span class="drop-cap">T</span>hen the voice came to Hosea again, not in thunder, but in a whisper that shook his soul. "Go again, love a woman who is loved by another man and is an adulteress." The command was absurd, impossible. It meant loving the source of his deepest pain. It meant loving Gomer.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\8.png" alt="Hosea receives the second command">
+                </div>
             </div>
         </div>
 
         <!-- Page 9 -->
-        <div class="page bg-page hidden" id="page-9" style="background-image: url('Images/9.png');">
+        <div class="page hidden" id="page-9">
             <div class="page-content">
                 <div class="page-text">
                     <h2>Redemption</h2>
                     <p><span class="drop-cap">H</span>e found her in the slave market. She stood on the auction block, her head bowed in shame. Hosea stepped forward. "I will buy her," he said, his voice clear and strong. He paid the price—fifteen shekels of silver and a homer and a lethech of barley—the full price for a common slave.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\9.png" alt="Hosea redeems Gomer">
+                </div>
             </div>
         </div>
 
         <!-- Page 10 -->
-        <div class="page bg-page hidden" id="page-10" style="background-image: url('Images/10.png');">
+        <div class="page hidden" id="page-10">
             <div class="page-content">
                 <div class="page-text">
                     <h2>Beginning of Healing</h2>
                     <p><span class="drop-cap">H</span>e brought her home. Not as a slave, but as his wife. He looked at her, at the ruins of the woman he had married, and said, "You must stay with me for many days; you shall not play the harlot, or belong to another man. So I will also be to you." It was not the end of the pain, but the beginning of a long healing. It was a love that refused to let go, a love that bought back what was broken and promised, in the quiet darkness, the hope of a new dawn.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\10.png" alt="Beginning of healing">
+                </div>
             </div>
         </div>
 
         <!-- Page 11 -->
-        <div class="page bg-page hidden" id="page-11" style="background-image: url('Images/11.png');">
+        <div class="page hidden" id="page-11">
             <div class="page-content">
                 <div class="page-text">
                     <h2>The Nature of Love</h2>
@@ -458,111 +442,144 @@
                     </div>
                     <p>— 1 Corinthians 13:4-8a</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\11.png" alt="The nature of love">
+                </div>
             </div>
         </div>
 
         <!-- Page 12 -->
-        <div class="page bg-page hidden" id="page-12" style="background-image: url('Images/12.png');">
+        <div class="page hidden" id="page-12">
             <div class="page-content">
                 <div class="page-text">
                     <h2>What Gomer Deserved</h2>
                     <p><span class="drop-cap">W</span>hat did Gomer truly deserve? By the law of her people and the word of God, her path should have been walled with thorns. She should have been stripped bare, her shame exposed to the lovers she chased. The grain, the wine, the oil—all the gifts she took for granted—should have been taken away, leaving her like a parched desert, a ruined vineyard. Her feasts should have turned to mourning. This was the judgment for her betrayal, the bitter harvest of her choices.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\12.png" alt="What Gomer deserved">
+                </div>
             </div>
         </div>
 
         <!-- Page 13 -->
-        <div class="page bg-page hidden" id="page-13" style="background-image: url('Images/13.png');">
+        <div class="page hidden" id="page-13">
             <div class="page-content">
                 <div class="page-text">
                     <h2>The Parallel to Christ</h2>
                     <p><span class="drop-cap">T</span>his story, etched in the lives of a prophet and his unfaithful wife, is not just about them. It is a mirror reflecting a much larger love story. Hosea, in his unwavering, pursuing love, is a living picture of God. His heart, broken by betrayal, mirrors the grief of a Creator whose people turn away.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\13.png" alt="Hosea as a picture of God">
+                </div>
             </div>
         </div>
 
         <!-- Page 14 -->
-        <div class="page bg-page hidden" id="page-14" style="background-image: url('Images/14.png');">
+        <div class="page hidden" id="page-14">
             <div class="page-content">
                 <div class="page-text">
                     <h2>Humanity's Betrayal</h2>
                     <p><span class="drop-cap">A</span>nd Gomer, in her restlessness and her constant search for something more, represents humanity. We, too, chase after fleeting pleasures and empty promises, forgetting the source of all true love and provision. We take the gifts of life—the grain, the wine, the oil—and forget the Giver, offering our hearts to lesser things. Our sins are like Gomer's adultery. Each time we choose our own way, we break the heart of God. We wander from the safety of His love, selling ourselves into the slavery of sin, ending up broken and ashamed on an auction block of our own making.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\14.png" alt="Humanity's betrayal">
+                </div>
             </div>
         </div>
 
         <!-- Page 15 -->
-        <div class="page bg-page hidden" id="page-15" style="background-image: url('Images/15.png');">
+        <div class="page hidden" id="page-15">
             <div class="page-content">
                 <div class="page-text">
                     <h2>God's Pursuit</h2>
                     <p><span class="drop-cap">B</span>ut the story does not end in judgment. Just as Hosea went to the slave market, God, in His infinite mercy, came to find us. He did not wait for us to be worthy. He came to the auction block of our shame and paid the ultimate price to buy us back. Not with silver or barley, but with the precious blood of his Son, Jesus.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\15.png" alt="God's pursuit">
+                </div>
             </div>
         </div>
 
         <!-- Page 16 -->
-        <div class="page bg-page hidden" id="page-16" style="background-image: url('Images/16.png');">
+        <div class="page hidden" id="page-16">
             <div class="page-content">
                 <div class="page-text">
                     <h2>The Ultimate Price Paid</h2>
                     <p><span class="drop-cap">G</span>omer was never made to pay the full price for her sin. She deserved to be stripped naked, her shame put on public display. But she was spared. Instead, Jesus, who was without any sin, took her punishment. He was the one stripped of all his clothes, his nakedness exposed to the mocking crowds. He absorbed the shame that was meant for Gomer, the shame that was meant for us.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\16.png" alt="Jesus takes our shame">
+                </div>
             </div>
         </div>
 
         <!-- Page 17 -->
-        <div class="page bg-page hidden" id="page-17" style="background-image: url('Images/17.png');">
+        <div class="page hidden" id="page-17">
             <div class="page-content">
                 <div class="page-text">
                     <h2>The Scourging</h2>
                     <p><span class="drop-cap">T</span>he law demanded punishment, and the punishment was brutal. Jesus was tied to a post and lashed thirty-nine times, the maximum penalty allowed. The whip was not a simple strap of leather; it was a scourge, tipped with bone and metal, designed to rip and tear. With each strike, flesh was pulled from his body. Blood oozed from countless wounds until his back was a shredded ruin and his rib cage was exposed. He hardly looked human.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\17.png" alt="The scourging">
+                </div>
             </div>
         </div>
 
         <!-- Page 18 -->
-        <div class="page bg-page hidden" id="page-18" style="background-image: url('Images/18.png');">
+        <div class="page hidden" id="page-18">
             <div class="page-content">
                 <div class="page-text">
                     <h2>The Journey to the Cross</h2>
                     <p><span class="drop-cap">A</span>nd that was only the beginning. In this mangled state, a crossbeam weighing more than fifty kilograms was heaved onto his bleeding shoulders. He was forced to carry it for a kilometer through the city streets. The people he came to save now cursed him, spat on him, and tried to trip him, laughing when he fell. He endured it all for a sin he did not commit.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\18.png" alt="Journey to the cross">
+                </div>
             </div>
         </div>
 
         <!-- Page 19 -->
-        <div class="page bg-page hidden" id="page-19" style="background-image: url('Images/19.png');">
+        <div class="page hidden" id="page-19">
             <div class="page-content">
                 <div class="page-text">
                     <h2>The Agony of the Cross</h2>
                     <p><span class="drop-cap">T</span>he worst suffering was on the cross. Iron spikes were driven through the nerves in his hands and through his feet, pinning him to the wood. To breathe, he had to push his entire body upward, scraping his exposed ribs against the splintered timber. Every single breath was a fresh wave of blinding, searing pain. He hung there for hours, suspended between heaven and earth.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\19.png" alt="The agony of the cross">
+                </div>
             </div>
         </div>
 
         <!-- Page 20 -->
-        <div class="page bg-page hidden" id="page-20" style="background-image: url('Images/20.png');">
+        <div class="page hidden" id="page-20">
             <div class="page-content">
                 <div class="page-text">
                     <h2>The Power of Choice</h2>
                     <p><span class="drop-cap">Y</span>et, he was not powerless. He is the commander of the angel armies of the Lord. One word from his lips and twelve legions of angels would have descended to wipe the planet clean. But he remained silent. He chose the nails. He chose the pain. He chose to suffer, to endure it all in the name of love, until every last drop of his blood was shed to pay our debt and break the shackles of sin forever.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\20.png" alt="The power of choice">
+                </div>
             </div>
         </div>
 
         <!-- Page 21 -->
-        <div class="page bg-page hidden" id="page-21" style="background-image: url('Images/21.png');">
+        <div class="page hidden" id="page-21">
             <div class="page-content">
                 <div class="page-text">
                     <h2>Redeeming Love</h2>
                     <p><span class="drop-cap">T</span>his is the love that bought us back. He brings us home, not as slaves, but as beloved children. He clothes us in righteousness and promises to be with us forever. His is a love that redeems, a love that restores, a love that sees the ruins of our lives and promises to build something beautiful. It is a love that never, ever fails.</p>
                 </div>
+                <div class="page-image">
+                    <img src="Images\21.png" alt="Redeeming love">
+                </div>
             </div>
         </div>
 
         <!-- Page 22 -->
-        <div class="page bg-page hidden" id="page-22" style="background-image: url('Images/22.png');">
+        <div class="page hidden" id="page-22">
             <div class="page-content">
                 <div class="page-text">
                     <h2>References and Biblical Sources</h2>
@@ -576,11 +593,14 @@
                         </ul>
                     </div>
                 </div>
+                <div class="page-image">
+                    <img src="Images\22.png" alt="Biblical sources">
+                </div>
             </div>
         </div>
 
         <!-- Page 23 -->
-        <div class="page bg-page hidden" id="page-23" style="background-image: url('Images/23.png');">
+        <div class="page hidden" id="page-23">
             <div class="page-content">
                 <div class="page-text">
                     <h2>More Biblical Sources</h2>
@@ -594,11 +614,14 @@
                         <p>This storybook, "Hosea and Gomer," was created by Samuel Kurian Roy.</p>
                     </div>
                 </div>
+                <div class="page-image">
+                    <img src="Images\23.png" alt="More biblical sources">
+                </div>
             </div>
         </div>
 
         <!-- Page 24 -->
-        <div class="page bg-page hidden" id="page-24" style="background-image: url('Images/24.png');">
+        <div class="page hidden" id="page-24">
             <div class="page-content">
                 <div class="page-text">
                     <h2>The End</h2>
@@ -606,6 +629,9 @@
                     <div class="divider"></div>
                     <p>For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.</p>
                     <p>— John 3:16</p>
+                </div>
+                <div class="page-image">
+                    <img src="Images\24.png" alt="The end">
                 </div>
             </div>
         </div>
