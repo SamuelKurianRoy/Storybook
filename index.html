@@ -169,6 +169,50 @@
             color: #8d6e63;
         }
 
+        .audio-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .audio-btn {
+            background: rgba(93, 64, 55, 0.9);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .audio-btn:hover {
+            background: rgba(93, 64, 55, 1);
+            transform: scale(1.1);
+        }
+
+        .audio-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .audio-btn.playing {
+            background: rgba(141, 110, 99, 0.9);
+        }
+
+        .audio-btn.playing:hover {
+            background: rgba(141, 110, 99, 1);
+        }
+
         .cover-page {
             display: flex;
             flex-direction: column;
@@ -312,6 +356,7 @@
                 margin: 0;
                 padding: 0;
                 overflow: hidden;
+                justify-content: flex-start;
             }
 
             .storybook-container {
@@ -323,7 +368,7 @@
             }
             
             .page {
-                padding: 20px;
+                padding: 15px 20px 20px 20px;
                 border-radius: 0;
             }
 
@@ -393,6 +438,17 @@
 
             .references h2 {
                 font-size: 1.5rem;
+            }
+
+            .audio-controls {
+                top: 10px;
+                right: 10px;
+            }
+
+            .audio-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
             }
         }
      /* === FIX: Make References pages text white for better visibility === */
@@ -685,6 +741,16 @@
             </div>
         </div>
 
+        <!-- Audio Controls -->
+        <div class="audio-controls">
+            <button class="audio-btn" id="audio-btn" onclick="toggleAudio()" title="Play Audio">
+                <i class="fas fa-play" id="audio-icon"></i>
+            </button>
+        </div>
+
+        <!-- Hidden Audio Element -->
+        <audio id="page-audio" preload="none"></audio>
+
         <!-- Navigation -->
         <div class="navigation">
             <button class="nav-btn" id="prev-btn" onclick="changePage(-1)">
@@ -704,6 +770,77 @@
     <script>
         let currentPage = 0;
         const totalPages = 25; // Cover + 24 pages
+        const audioElement = document.getElementById('page-audio');
+        const audioBtn = document.getElementById('audio-btn');
+        const audioIcon = document.getElementById('audio-icon');
+        let isPlaying = false;
+
+        // Pages that have audio files
+        const pagesWithAudio = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 25];
+
+        function loadAudio(pageNum) {
+            // Stop current audio
+            audioElement.pause();
+            audioElement.currentTime = 0;
+            isPlaying = false;
+            updateAudioButton();
+
+            // Check if this page has audio
+            if (pagesWithAudio.includes(pageNum)) {
+                audioElement.src = `Audio/${pageNum}.mp3`;
+                audioBtn.disabled = false;
+                
+                // Auto-play option (remove these two lines if you don't want auto-play)
+                // audioElement.play().catch(() => {});
+                // isPlaying = true;
+            } else {
+                audioElement.src = '';
+                audioBtn.disabled = true;
+            }
+            updateAudioButton();
+        }
+
+        function toggleAudio() {
+            if (isPlaying) {
+                audioElement.pause();
+                isPlaying = false;
+            } else {
+                audioElement.play().then(() => {
+                    isPlaying = true;
+                    updateAudioButton();
+                }).catch((error) => {
+                    console.log('Audio play failed:', error);
+                    isPlaying = false;
+                    updateAudioButton();
+                });
+            }
+            updateAudioButton();
+        }
+
+        function updateAudioButton() {
+            if (isPlaying) {
+                audioIcon.className = 'fas fa-pause';
+                audioBtn.classList.add('playing');
+                audioBtn.title = 'Pause Audio';
+            } else {
+                audioIcon.className = 'fas fa-play';
+                audioBtn.classList.remove('playing');
+                audioBtn.title = 'Play Audio';
+            }
+        }
+
+        // Audio ended event listener
+        audioElement.addEventListener('ended', () => {
+            isPlaying = false;
+            updateAudioButton();
+        });
+
+        // Audio error event listener
+        audioElement.addEventListener('error', () => {
+            audioBtn.disabled = true;
+            isPlaying = false;
+            updateAudioButton();
+        });
 
         function showPage(pageNum) {
             // Hide all pages
@@ -726,6 +863,9 @@
             // Update navigation buttons
             document.getElementById('prev-btn').disabled = pageNum === 0;
             document.getElementById('next-btn').disabled = pageNum === totalPages - 1;
+
+            // Load audio for this page
+            loadAudio(pageNum);
         }
 
         function changePage(direction) {
