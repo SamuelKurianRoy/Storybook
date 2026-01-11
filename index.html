@@ -308,33 +308,91 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+
             .storybook-container {
-                height: 500px;
+                width: 100vw;
+                height: 100vh;
+                height: 100dvh; /* Dynamic viewport height for mobile browsers */
+                margin: 0;
+                max-width: 100%;
             }
             
+            .page {
+                padding: 20px;
+                border-radius: 0;
+            }
+
             .page-content {
                 flex-direction: column;
+                gap: 15px;
             }
             
             .page-image {
                 flex: 0 0 30%;
                 order: -1;
             }
+
+            .page-text {
+                padding-right: 5px;
+            }
             
             h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
+                margin-bottom: 15px;
             }
             
             .cover-page h1 {
-                font-size: 2.5rem;
+                font-size: 2.2rem;
             }
             
             h2 {
-                font-size: 1.5rem;
+                font-size: 1.4rem;
+                margin-bottom: 15px;
             }
             
             p {
-                font-size: 1.1rem;
+                font-size: 1rem;
+                line-height: 1.6;
+                margin-bottom: 12px;
+            }
+
+            .drop-cap {
+                font-size: 3.5rem;
+                line-height: 2.8rem;
+            }
+
+            .scripture {
+                font-size: 1rem;
+                padding: 12px;
+                margin: 15px 0;
+            }
+
+            .navigation {
+                padding: 0 20px;
+                bottom: 15px;
+            }
+
+            .nav-btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+
+            .page-indicator {
+                bottom: 60px;
+                font-size: 0.8rem;
+            }
+
+            .references {
+                font-size: 0.95rem;
+            }
+
+            .references h2 {
+                font-size: 1.5rem;
             }
         }
      /* === FIX: Make References pages text white for better visibility === */
