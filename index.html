@@ -790,9 +790,15 @@
                 audioElement.src = `Audio/${pageNum}.mp3`;
                 audioBtn.disabled = false;
                 
-                // Auto-play option (remove these two lines if you don't want auto-play)
-                // audioElement.play().catch(() => {});
-                // isPlaying = true;
+                // Auto-play audio
+                audioElement.play().then(() => {
+                    isPlaying = true;
+                    updateAudioButton();
+                }).catch(() => {
+                    // Auto-play blocked by browser, user needs to interact first
+                    isPlaying = false;
+                    updateAudioButton();
+                });
             } else {
                 audioElement.src = '';
                 audioBtn.disabled = true;
@@ -833,6 +839,13 @@
         audioElement.addEventListener('ended', () => {
             isPlaying = false;
             updateAudioButton();
+            
+            // Automatically go to next page if not on last page
+            if (currentPage < totalPages - 1) {
+                setTimeout(() => {
+                    changePage(1);
+                }, 500); // Small delay before transitioning
+            }
         });
 
         // Audio error event listener
