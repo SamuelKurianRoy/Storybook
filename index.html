@@ -30,8 +30,8 @@
 
         .storybook-container {
             width: 90%;
-            max-width: 900px;
-            height: 600px;
+            max-width: 1200px;
+            height: 700px;
             position: relative;
             perspective: 2000px;
             margin: 20px auto;
@@ -70,6 +70,25 @@
             padding-right: 10px;
             z-index: 2;
             position: relative;
+        }
+
+        /* Custom scrollbar for webkit browsers */
+        .page-text::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .page-text::-webkit-scrollbar-track {
+            background: rgba(141, 110, 99, 0.1);
+            border-radius: 4px;
+        }
+
+        .page-text::-webkit-scrollbar-thumb {
+            background: rgba(141, 110, 99, 0.4);
+            border-radius: 4px;
+        }
+
+        .page-text::-webkit-scrollbar-thumb:hover {
+            background: rgba(141, 110, 99, 0.6);
         }
 
         .page-image {
@@ -165,11 +184,13 @@
 
         .page-indicator {
             position: absolute;
-            bottom: 70px;
+            bottom: 80px;
             width: 100%;
             text-align: center;
             font-size: 0.9rem;
             color: #8d6e63;
+            z-index: 99;
+            font-weight: 600;
         }
 
         .audio-controls {
@@ -214,6 +235,14 @@
 
         .audio-btn.playing:hover {
             background: rgba(141, 110, 99, 1);
+        }
+
+        .autoplay-btn.disabled {
+            background: rgba(180, 50, 50, 0.9);
+        }
+
+        .autoplay-btn.disabled:hover {
+            background: rgba(180, 50, 50, 1);
         }
 
         .cover-page {
@@ -354,6 +383,104 @@
             color: #f5f5f5;
         }
 
+        /* Tablet styles */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .storybook-container {
+                width: 85%;
+                max-width: 900px;
+                height: 650px;
+            }
+
+            .page {
+                padding: 35px;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .cover-page h1 {
+                font-size: 3rem;
+            }
+
+            h2 {
+                font-size: 1.8rem;
+            }
+
+            p {
+                font-size: 1.2rem;
+            }
+
+            .drop-cap {
+                font-size: 4rem;
+                line-height: 3.2rem;
+            }
+        }
+
+        /* Large desktop styles */
+        @media (min-width: 1440px) {
+            .storybook-container {
+                max-width: 1400px;
+                height: 800px;
+            }
+
+            .page {
+                padding: 50px;
+            }
+
+            h1 {
+                font-size: 3rem;
+            }
+
+            .cover-page h1 {
+                font-size: 4rem;
+            }
+
+            h2 {
+                font-size: 2.2rem;
+            }
+
+            p {
+                font-size: 1.4rem;
+                line-height: 2;
+            }
+
+            .drop-cap {
+                font-size: 5rem;
+                line-height: 4rem;
+            }
+
+            .scripture {
+                font-size: 1.3rem;
+                padding: 18px;
+            }
+
+            .nav-btn {
+                padding: 12px 24px;
+                font-size: 1.1rem;
+            }
+
+            .audio-btn {
+                width: 55px;
+                height: 55px;
+                font-size: 1.3rem;
+            }
+
+            .references {
+                font-size: 1.2rem;
+            }
+
+            .references h2 {
+                font-size: 2rem;
+            }
+
+            .page-indicator {
+                bottom: 90px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Mobile styles */
         @media (max-width: 768px) {
             body {
                 margin: 0;
@@ -707,6 +834,8 @@
                             <li><strong>1 Corinthians 13:4-8a:</strong> The specific verses quoted detailing the nature of love.</li>
                             <li><strong>The Gospel of Matthew:</strong> Accounts of the crucifixion and Jesus's statement regarding the angel armies (Matthew 26:53).</li>
                             <li><strong>The Gospel of John:</strong> For details of the crucifixion, including the debt payment (John 19:30).</li>
+                            <li><strong>The Gospel of Luke and Mark:</strong> For accounts of the scourging and the journey to the cross.</li>
+                            <li><strong>Isaiah 53:5:</strong> References the scourging and Jesus's substitutionary suffering.</li>
                         </ul>
                     </div>
                 </div>
@@ -716,18 +845,10 @@
         <!-- Page 23 -->
         <div class="page bg-page hidden" id="page-23" style="background-image: url('Images/23.png');">
             <div class="page-content">
-                <div class="page-text">
-                    <h2>More Biblical Sources</h2>
-                    <div class="references">
-                        <ul>
-                            <li><strong>The Gospel of Luke and Mark:</strong> For accounts of the scourging and the journey to the cross.</li>
-                            <li><strong>Isaiah 53:5:</strong> References the scourging and Jesus's substitutionary suffering.</li>
-                        </ul>
-                        <div class="divider"></div>
-                        <h2>Attribution</h2>
-                        <p>This storybook, "Hosea and Gomer," was created by Samuel Kurian Roy.</p>
-                        <p style="text-align: center; margin-top: 10px; font-style: italic;">S.D.G.</p>
-                    </div>
+                <div class="page-text" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <p style="text-align: center; font-size: 1.2rem; margin-bottom: 15px;">Created by</p>
+                    <p style="text-align: center; font-size: 2rem; font-weight: bold; margin-bottom: 30px;">Samuel Kurian Roy</p>
+                    <p style="text-align: center; font-style: italic;">S.D.G.</p>
                 </div>
             </div>
         </div>
@@ -749,6 +870,9 @@
         <div class="audio-controls">
             <button class="audio-btn" id="audio-btn" onclick="toggleAudio()" title="Play Audio">
                 <i class="fas fa-play" id="audio-icon"></i>
+            </button>
+            <button class="audio-btn autoplay-btn" id="autoplay-btn" onclick="toggleAutoplay()" title="Autoplay Enabled">
+                <span id="autoplay-icon" style="font-weight: bold; font-size: 1.3rem;">A</span>
             </button>
         </div>
 
@@ -777,7 +901,10 @@
         const audioElement = document.getElementById('page-audio');
         const audioBtn = document.getElementById('audio-btn');
         const audioIcon = document.getElementById('audio-icon');
+        const autoplayBtn = document.getElementById('autoplay-btn');
+        const autoplayIcon = document.getElementById('autoplay-icon');
         let isPlaying = false;
+        let autoplayEnabled = true; // Default autoplay is on
 
         // Pages that have audio files
         const pagesWithAudio = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 24];
@@ -794,15 +921,17 @@
                 audioElement.src = `Audio/${pageNum}.mp3`;
                 audioBtn.disabled = false;
                 
-                // Auto-play audio
-                audioElement.play().then(() => {
-                    isPlaying = true;
-                    updateAudioButton();
-                }).catch(() => {
-                    // Auto-play blocked by browser, user needs to interact first
-                    isPlaying = false;
-                    updateAudioButton();
-                });
+                // Auto-play audio only if autoplay is enabled
+                if (autoplayEnabled) {
+                    audioElement.play().then(() => {
+                        isPlaying = true;
+                        updateAudioButton();
+                    }).catch(() => {
+                        // Auto-play blocked by browser, user needs to interact first
+                        isPlaying = false;
+                        updateAudioButton();
+                    });
+                }
             } else {
                 audioElement.src = '';
                 audioBtn.disabled = true;
@@ -836,6 +965,25 @@
                 audioIcon.className = 'fas fa-play';
                 audioBtn.classList.remove('playing');
                 audioBtn.title = 'Play Audio';
+            }
+        }
+
+        function toggleAutoplay() {
+            autoplayEnabled = !autoplayEnabled;
+            updateAutoplayButton();
+        }
+
+        function updateAutoplayButton() {
+            if (autoplayEnabled) {
+                autoplayIcon.textContent = 'A';
+                autoplayIcon.style.textDecoration = 'none';
+                autoplayBtn.classList.remove('disabled');
+                autoplayBtn.title = 'Autoplay Enabled (Click to Disable)';
+            } else {
+                autoplayIcon.textContent = 'A';
+                autoplayIcon.style.textDecoration = 'line-through';
+                autoplayBtn.classList.add('disabled');
+                autoplayBtn.title = 'Autoplay Disabled (Click to Enable)';
             }
         }
 
@@ -895,6 +1043,7 @@
 
         // Initialize the first page
         showPage(currentPage);
+        updateAutoplayButton();
 
         // Keyboard navigation
         document.addEventListener('keydown', function(event) {
