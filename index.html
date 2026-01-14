@@ -234,6 +234,66 @@
             font-weight: 600;
         }
 
+        .page-nav-menu {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .page-select {
+            background: rgba(93, 64, 55, 0.9);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            font-family: 'Crimson Text', serif;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            max-width: 250px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .page-select:hover {
+            background: rgba(93, 64, 55, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .page-select option {
+            background: #5d4037;
+            color: white;
+            padding: 8px;
+        }
+
+        .jump-to-page-btn {
+            background: rgba(93, 64, 55, 0.9);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .jump-to-page-btn:hover {
+            background: rgba(93, 64, 55, 1);
+            transform: scale(1.1);
+        }
+
         .audio-controls {
             position: absolute;
             top: 20px;
@@ -719,6 +779,23 @@
                 height: 45px;
                 font-size: 1rem;
             }
+
+            .page-nav-menu {
+                top: 10px;
+                left: 10px;
+            }
+
+            .page-select {
+                font-size: 0.85rem;
+                padding: 8px 12px;
+                max-width: 150px;
+            }
+
+            .jump-to-page-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
+            }
         }
      /* === FIX: Make References pages text white for better visibility === */
     #page-22 p, 
@@ -741,6 +818,40 @@
 </head>
 <body>
     <div class="storybook-container">
+        <!-- Page Navigation Menu -->
+        <div class="page-nav-menu">
+            <button class="jump-to-page-btn" onclick="togglePageMenu()" title="Jump to Page">
+                <i class="fas fa-list"></i>
+            </button>
+            <select class="page-select" id="page-selector" onchange="jumpToPage()" style="display: none;">
+                <option value="0">Cover - Hosea and Gomer</option>
+                <option value="1">Page 1 - The Prophet's Calling</option>
+                <option value="2">Page 2 - Meeting Gomer</option>
+                <option value="3">Page 3 - A Quiet Harbor</option>
+                <option value="4">Page 4 - The First Betrayal</option>
+                <option value="5">Page 5 - Deepening Shame</option>
+                <option value="6">Page 6 - A Spectacle of Shame</option>
+                <option value="7">Page 7 - Years Passed</option>
+                <option value="8">Page 8 - The Second Command</option>
+                <option value="9">Page 9 - Redemption</option>
+                <option value="10">Page 10 - Beginning of Healing</option>
+                <option value="11">Page 11 - The Nature of Love</option>
+                <option value="12">Page 12 - What Gomer Deserved</option>
+                <option value="13">Page 13 - The Parallel to Christ</option>
+                <option value="14">Page 14 - Humanity's Betrayal</option>
+                <option value="15">Page 15 - God's Pursuit</option>
+                <option value="16">Page 16 - The Ultimate Price Paid</option>
+                <option value="17">Page 17 - The Scourging</option>
+                <option value="18">Page 18 - The Journey to the Cross</option>
+                <option value="19">Page 19 - The Agony of the Cross</option>
+                <option value="20">Page 20 - The Power of Choice</option>
+                <option value="21">Page 21 - Redeeming Love</option>
+                <option value="22">Page 22 - References</option>
+                <option value="23">Page 23 - Credits</option>
+                <option value="24">Page 24 - The End</option>
+            </select>
+        </div>
+
         <!-- Cover Page -->
         <div class="page cover-page" id="page-0">
             <h1>Hosea and Gomer</h1>
@@ -1044,6 +1155,37 @@
         const autoplayIcon = document.getElementById('autoplay-icon');
         let isPlaying = false;
         let autoplayEnabled = true; // Default autoplay is on
+        let pageMenuVisible = false;
+
+        function togglePageMenu() {
+            const pageSelector = document.getElementById('page-selector');
+            pageMenuVisible = !pageMenuVisible;
+            
+            if (pageMenuVisible) {
+                pageSelector.style.display = 'block';
+                pageSelector.value = currentPage;
+                // Auto-focus for easier interaction
+                setTimeout(() => pageSelector.focus(), 100);
+            } else {
+                pageSelector.style.display = 'none';
+            }
+        }
+
+        function jumpToPage() {
+            const pageSelector = document.getElementById('page-selector');
+            const selectedPage = parseInt(pageSelector.value);
+            
+            if (selectedPage !== currentPage && selectedPage >= 0 && selectedPage < totalPages) {
+                // Calculate direction for animation
+                const direction = selectedPage > currentPage ? 1 : -1;
+                showPage(selectedPage, direction);
+                currentPage = selectedPage;
+            }
+            
+            // Hide the menu after selection
+            pageMenuVisible = false;
+            pageSelector.style.display = 'none';
+        }
 
         // Pages that have audio files
         const pagesWithAudio = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 24];
