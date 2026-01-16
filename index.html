@@ -25,16 +25,17 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            padding: 20px 0;
         }
 
         .storybook-container {
             width: 90%;
             max-width: 1200px;
-            height: 700px;
+            height: 85vh;
+            max-height: 700px;
             position: relative;
             perspective: 2000px;
-            margin: 20px auto;
+            margin: auto;
         }
 
         .page {
@@ -52,7 +53,7 @@
                         box-shadow 1.2s cubic-bezier(0.645, 0.045, 0.355, 1),
                         filter 0.6s ease;
             transform-origin: left center;
-            padding: 40px;
+            padding: 40px 40px 100px 40px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -192,7 +193,9 @@
         .navigation {
             position: absolute;
             bottom: 20px;
-            width: 100%;
+            left: 0;
+            right: 0;
+            width: calc(100% - 80px);
             display: flex;
             justify-content: space-between;
             padding: 0 40px;
@@ -587,11 +590,12 @@
             .storybook-container {
                 width: 85%;
                 max-width: 900px;
-                height: 650px;
+                height: 80vh;
+                max-height: 650px;
             }
 
             .page {
-                padding: 35px;
+                padding: 35px 35px 90px 35px;
             }
 
             h1 {
@@ -620,11 +624,12 @@
         @media (min-width: 1440px) {
             .storybook-container {
                 max-width: 1400px;
-                height: 800px;
+                height: 85vh;
+                max-height: 850px;
             }
 
             .page {
-                padding: 50px;
+                padding: 50px 50px 120px 50px;
             }
 
             h1 {
@@ -684,7 +689,6 @@
             body {
                 margin: 0;
                 padding: 0;
-                overflow: hidden;
                 justify-content: flex-start;
             }
 
@@ -694,10 +698,11 @@
                 height: 100dvh; /* Dynamic viewport height for mobile browsers */
                 margin: 0;
                 max-width: 100%;
+                max-height: none;
             }
             
             .page {
-                padding: 15px 20px 20px 20px;
+                padding: 15px 20px 80px 20px;
                 border-radius: 0;
             }
 
@@ -1128,6 +1133,9 @@
 
         <!-- Hidden Audio Element -->
         <audio id="page-audio" preload="none"></audio>
+        
+        <!-- Background Music Element -->
+        <audio id="background-music" preload="none" loop></audio>
 
         <!-- Navigation -->
         <div class="navigation">
@@ -1149,6 +1157,7 @@
         let currentPage = 0;
         const totalPages = 25; // Cover + 24 pages
         const audioElement = document.getElementById('page-audio');
+        const backgroundMusic = document.getElementById('background-music');
         const audioBtn = document.getElementById('audio-btn');
         const audioIcon = document.getElementById('audio-icon');
         const autoplayBtn = document.getElementById('autoplay-btn');
@@ -1156,6 +1165,18 @@
         let isPlaying = false;
         let autoplayEnabled = true; // Default autoplay is on
         let pageMenuVisible = false;
+        
+        // Set background music volume to 100% initially
+        backgroundMusic.volume = 1.0;
+        let backgroundMusicVolumeReduced = false;
+        
+        // Add event listener to reduce volume after 28 seconds
+        backgroundMusic.addEventListener('timeupdate', function() {
+            if (backgroundMusic.currentTime >= 28 && !backgroundMusicVolumeReduced) {
+                backgroundMusic.volume = 0.2;
+                backgroundMusicVolumeReduced = true;
+            }
+        });
 
         function togglePageMenu() {
             const pageSelector = document.getElementById('page-selector');
@@ -1189,6 +1210,25 @@
 
         // Pages that have audio files
         const pagesWithAudio = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 24];
+        
+        // Function to handle background music
+        function handleBackgroundMusic(pageNum) {
+            if (pageNum >= 11) {
+                // Start or continue playing background music on page 11 and after
+                if (backgroundMusic.paused || !backgroundMusic.src.includes('En_Prananum_En_Ayusum_Abraham_Padinjarethalackal_Basil_Jacob.m4a')) {
+                    backgroundMusic.src = 'songs/En_Prananum_En_Ayusum_Abraham_Padinjarethalackal_Basil_Jacob.m4a';
+                    backgroundMusic.play().catch((error) => {
+                        console.log('Background music play failed:', error);
+                    });
+                }
+            } else {
+                // Stop background music only on pages before 11
+                backgroundMusic.pause();
+                backgroundMusic.currentTime = 0;
+                backgroundMusicVolumeReduced = false; // Reset volume flag when stopping
+                backgroundMusic.volume = 1.0; // Reset to full volume for next play
+            }
+        }
 
         function loadAudio(pageNum) {
             // Stop current audio
@@ -1305,9 +1345,17 @@
                         currentPageElement.classList.remove('hidden', 'page-flip');
                     }, 1200);
                 } else {
-                    // Moving backward - flip the previous page back
-                    currentPageElement.classList.remove('hidden');
-                    previousPageElement.classList.add('page-turning-back');
+                    // Moving backward - first make the page we're going to visible but behind
+                    currentPageElement.classList.remove('hidden', 'page-flip');
+                    
+                    // Make sure the current page is in flipped state before animating back
+                    previousPageElement.classList.remove('hidden');
+                    previousPageElement.classList.add('page-flip');
+                    
+                    // Small delay to ensure the flip state is applied
+                    setTimeout(() => {
+                        previousPageElement.classList.add('page-turning-back');
+                    }, 10);
                     
                     // After animation completes
                     setTimeout(() => {
@@ -1345,6 +1393,9 @@
             if (direction === 0 || Math.abs(direction) === 1) {
                 loadAudio(pageNum);
             }
+            
+            // Handle background music
+            handleBackgroundMusic(pageNum);
         }
 
         function changePage(direction) {
