@@ -1103,7 +1103,8 @@
                 <div class="page-text" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
                     <p style="text-align: center; font-size: 1.2rem; margin-bottom: 15px;">Created by</p>
                     <p style="text-align: center; font-size: 2rem; font-weight: bold; margin-bottom: 30px;">Samuel Kurian Roy</p>
-                    <p style="text-align: center; font-style: italic;">S.D.G.</p>
+                    <p style="text-align: center; font-style: italic; margin-bottom: 20px;">S.D.G.</p>
+                    <p style="text-align: center; font-size: 1rem;">For inquiries: storybookssdg@gmail.com</p>
                 </div>
             </div>
         </div>
@@ -1213,7 +1214,15 @@
         
         // Function to handle background music
         function handleBackgroundMusic(pageNum) {
-            if (pageNum >= 11) {
+            if (pageNum >= 1 && pageNum <= 2) {
+                // Play shallow-the-ten-tenors_cut.flac on pages 1-2
+                if (backgroundMusic.paused || !backgroundMusic.src.includes('shallow-the-ten-tenors_cut.flac')) {
+                    backgroundMusic.src = 'Songs/shallow-the-ten-tenors_cut.flac';
+                    backgroundMusic.play().catch((error) => {
+                        console.log('Background music play failed:', error);
+                    });
+                }
+            } else if (pageNum >= 11) {
                 // Start or continue playing background music on page 11 and after
                 if (backgroundMusic.paused || !backgroundMusic.src.includes('En_Prananum_En_Ayusum_Abraham_Padinjarethalackal_Basil_Jacob.m4a')) {
                     backgroundMusic.src = 'songs/En_Prananum_En_Ayusum_Abraham_Padinjarethalackal_Basil_Jacob.m4a';
@@ -1222,7 +1231,7 @@
                     });
                 }
             } else {
-                // Stop background music only on pages before 11
+                // Stop background music on pages that don't have background music
                 backgroundMusic.pause();
                 backgroundMusic.currentTime = 0;
                 backgroundMusicVolumeReduced = false; // Reset volume flag when stopping
