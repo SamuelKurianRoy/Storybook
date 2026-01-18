@@ -349,6 +349,91 @@
             background: rgba(180, 50, 50, 1);
         }
 
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(93, 64, 55, 0.9);
+            padding: 8px 12px;
+            border-radius: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-icon {
+            color: white;
+            font-size: 1rem;
+            min-width: 20px;
+        }
+
+        .volume-slider {
+            width: 80px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .volume-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .mute-btn {
+            background: rgba(93, 64, 55, 0.9);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .mute-btn:hover {
+            background: rgba(93, 64, 55, 1);
+            transform: scale(1.1);
+        }
+
+        .mute-btn.muted {
+            background: rgba(180, 50, 50, 0.9);
+        }
+
+        .mute-btn.muted:hover {
+            background: rgba(180, 50, 50, 1);
+        }
+
         .cover-page {
             display: flex;
             flex-direction: column;
@@ -777,12 +862,27 @@
             .audio-controls {
                 top: 10px;
                 right: 10px;
+                flex-wrap: wrap;
             }
 
             .audio-btn {
                 width: 45px;
                 height: 45px;
                 font-size: 1rem;
+            }
+
+            .mute-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
+            }
+
+            .volume-control {
+                padding: 6px 10px;
+            }
+
+            .volume-slider {
+                width: 60px;
             }
 
             .page-nav-menu {
@@ -1130,6 +1230,13 @@
             <button class="audio-btn autoplay-btn" id="autoplay-btn" onclick="toggleAutoplay()" title="Autoplay Enabled">
                 <span id="autoplay-icon" style="font-weight: bold; font-size: 1.3rem;">A</span>
             </button>
+            <div class="volume-control">
+                <i class="fas fa-volume-up volume-icon" id="volume-icon"></i>
+                <input type="range" min="0" max="100" value="50" class="volume-slider" id="volume-slider" title="Background Music Volume">
+            </div>
+            <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="Mute All Audio">
+                <i class="fas fa-volume-up" id="mute-icon"></i>
+            </button>
         </div>
 
         <!-- Hidden Audio Element -->
@@ -1163,13 +1270,18 @@
         const audioIcon = document.getElementById('audio-icon');
         const autoplayBtn = document.getElementById('autoplay-btn');
         const autoplayIcon = document.getElementById('autoplay-icon');
+        const volumeSlider = document.getElementById('volume-slider');
+        const volumeIcon = document.getElementById('volume-icon');
+        const muteBtn = document.getElementById('mute-btn');
+        const muteIcon = document.getElementById('mute-icon');
         let isPlaying = false;
         let autoplayEnabled = true; // Default autoplay is on
         let pageMenuVisible = false;
         let userInteracted = false; // Track if user has interacted with the page
-        
-        // Set up background music source immediately
-        backgroundMusic.src = "Songs/Redeemer_Dawn.mp3";
+        let isMuted = false;
+        let previousVolume = 0.5; // Store previous volume for unmute
+        let autoAdvanceTimer = null; // Timer for pages without audio
+        let fadeInterval = null; // Interval for fade in/out
 
         function togglePageMenu() {
             const pageSelector = document.getElementById('page-selector');
@@ -1204,21 +1316,119 @@
         // Pages that have audio files
         const pagesWithAudio = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 24];
         
-        // Function to handle background music
-        function handleBackgroundMusic(pageNum) {
-            // Play Redeemer's Dawn.mp3 on all pages
-            if (!userInteracted) {
-                userInteracted = true;
+        // Fade out background music
+        function fadeOutMusic(callback) {
+            const currentVolume = backgroundMusic.volume;
+            const volumeSliderValue = parseInt(volumeSlider.value);
+            const targetVolume = volumeSliderValue / 100;
+            
+            if (currentVolume <= 0.01) {
+                backgroundMusic.volume = 0;
+                if (callback) callback();
+                return;
             }
             
-            if (backgroundMusic.paused) {
-                backgroundMusic.play().catch((error) => {
+            let volume = currentVolume;
+            clearInterval(fadeInterval);
+            fadeInterval = setInterval(() => {
+                volume -= 0.05;
+                if (volume <= 0) {
+                    backgroundMusic.volume = 0;
+                    clearInterval(fadeInterval);
+                    if (callback) callback();
+                } else {
+                    backgroundMusic.volume = volume;
+                }
+            }, 50);
+        }
+
+        // Fade in background music
+        function fadeInMusic() {
+            const volumeSliderValue = parseInt(volumeSlider.value);
+            const targetVolume = isMuted ? 0 : (volumeSliderValue / 100);
+            
+            if (targetVolume === 0) {
+                backgroundMusic.volume = 0;
+                return;
+            }
+            
+            backgroundMusic.volume = 0;
+            let volume = 0;
+            clearInterval(fadeInterval);
+            fadeInterval = setInterval(() => {
+                volume += 0.05;
+                if (volume >= targetVolume) {
+                    backgroundMusic.volume = targetVolume;
+                    clearInterval(fadeInterval);
+                } else {
+                    backgroundMusic.volume = volume;
+                }
+            }, 50);
+        }
+
+        // Function to handle background music
+        function handleBackgroundMusic(pageNum) {
+            let songToPlay = '';
+            
+            // Part 1 (Pages 1–4 – Tender melancholic beginning)
+            if (pageNum >= 1 && pageNum <= 4) {
+                songToPlay = 'Songs/Part_1.mp3';
+            }
+            // Part 2 (Pages 5–9 – Deep sorrow & heartbreak)
+            else if (pageNum >= 5 && pageNum <= 9) {
+                songToPlay = 'Songs/Part_2.mp3';
+            }
+            // Part 3 (Pages 10–12 – Turning point & costly redemption)
+            else if (pageNum >= 10 && pageNum <= 12) {
+                songToPlay = 'Songs/Part_3.mp3';
+            }
+            // Part 4 (Pages 13–15 – Reflective build toward sacrifice)
+            else if (pageNum >= 13 && pageNum <= 15) {
+                songToPlay = 'Songs/Part_4.mp3';
+            }
+            // Part 5 (Pages 16–18 – Intense painful sacrifice)
+            else if (pageNum >= 16 && pageNum <= 18) {
+                songToPlay = 'Songs/Part_5.mp3';
+            }
+            // Part 6 (Pages 19–21+24 – Powerful hopeful resolution)
+            else if ((pageNum >= 19 && pageNum <= 21) || pageNum === 24) {
+                songToPlay = 'Songs/Part_6.mp3';
+            }
+            
+            // Only change the song if it's different from what's currently playing
+            if (songToPlay && !backgroundMusic.src.includes(songToPlay)) {
+                // Fade out current song, then change and fade in new song
+                fadeOutMusic(() => {
+                    backgroundMusic.src = songToPlay;
+                    backgroundMusic.play().then(() => {
+                        fadeInMusic();
+                    }).catch((error) => {
+                        console.log('Background music play failed:', error);
+                    });
+                });
+            } else if (songToPlay && backgroundMusic.paused) {
+                // Resume if paused with fade in
+                backgroundMusic.play().then(() => {
+                    fadeInMusic();
+                }).catch((error) => {
                     console.log('Background music play failed:', error);
+                });
+            } else if (!songToPlay) {
+                // Stop music if not in any defined range with fade out
+                fadeOutMusic(() => {
+                    backgroundMusic.pause();
+                    backgroundMusic.currentTime = 0;
                 });
             }
         }
 
         function loadAudio(pageNum) {
+            // Clear any existing auto-advance timer
+            if (autoAdvanceTimer) {
+                clearTimeout(autoAdvanceTimer);
+                autoAdvanceTimer = null;
+            }
+
             // Stop current audio
             audioElement.pause();
             audioElement.currentTime = 0;
@@ -1244,6 +1454,15 @@
             } else {
                 audioElement.src = '';
                 audioBtn.disabled = true;
+                
+                // Auto-advance after 15 seconds for pages without audio (22, 23) if autoplay is on
+                if (autoplayEnabled && (pageNum === 22 || pageNum === 23)) {
+                    autoAdvanceTimer = setTimeout(() => {
+                        if (currentPage < totalPages - 1) {
+                            changePage(1);
+                        }
+                    }, 15000); // 15 seconds
+                }
             }
             updateAudioButton();
         }
@@ -1293,6 +1512,72 @@
                 autoplayIcon.style.textDecoration = 'line-through';
                 autoplayBtn.classList.add('disabled');
                 autoplayBtn.title = 'Autoplay Disabled (Click to Enable)';
+            }
+        }
+
+        // Volume control for background music
+        volumeSlider.addEventListener('input', function() {
+            const volume = this.value / 100;
+            backgroundMusic.volume = volume;
+            previousVolume = volume;
+            
+            // Update volume icon based on level
+            if (volume === 0) {
+                volumeIcon.className = 'fas fa-volume-mute volume-icon';
+            } else if (volume < 0.5) {
+                volumeIcon.className = 'fas fa-volume-down volume-icon';
+            } else {
+                volumeIcon.className = 'fas fa-volume-up volume-icon';
+            }
+            
+            // If volume is changed from 0, unmute
+            if (volume > 0 && isMuted) {
+                isMuted = false;
+                updateMuteButton();
+            }
+        });
+
+        // Set initial volume
+        backgroundMusic.volume = 0.5;
+
+        // Mute/Unmute all audio
+        function toggleMute() {
+            isMuted = !isMuted;
+            
+            if (isMuted) {
+                // Mute both audio elements
+                previousVolume = backgroundMusic.volume;
+                backgroundMusic.volume = 0;
+                audioElement.volume = 0;
+                volumeSlider.value = 0;
+                volumeIcon.className = 'fas fa-volume-mute volume-icon';
+            } else {
+                // Unmute
+                backgroundMusic.volume = previousVolume;
+                audioElement.volume = 1;
+                volumeSlider.value = previousVolume * 100;
+                
+                if (previousVolume === 0) {
+                    volumeIcon.className = 'fas fa-volume-mute volume-icon';
+                } else if (previousVolume < 0.5) {
+                    volumeIcon.className = 'fas fa-volume-down volume-icon';
+                } else {
+                    volumeIcon.className = 'fas fa-volume-up volume-icon';
+                }
+            }
+            
+            updateMuteButton();
+        }
+
+        function updateMuteButton() {
+            if (isMuted) {
+                muteIcon.className = 'fas fa-volume-mute';
+                muteBtn.classList.add('muted');
+                muteBtn.title = 'Unmute All Audio';
+            } else {
+                muteIcon.className = 'fas fa-volume-up';
+                muteBtn.classList.remove('muted');
+                muteBtn.title = 'Mute All Audio';
             }
         }
 
