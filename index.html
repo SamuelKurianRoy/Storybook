@@ -1166,18 +1166,10 @@
         let isPlaying = false;
         let autoplayEnabled = true; // Default autoplay is on
         let pageMenuVisible = false;
+        let userInteracted = false; // Track if user has interacted with the page
         
-        // Set background music volume to 100% initially
-        backgroundMusic.volume = 1.0;
-        let backgroundMusicVolumeReduced = false;
-        
-        // Add event listener to reduce volume after 28 seconds
-        backgroundMusic.addEventListener('timeupdate', function() {
-            if (backgroundMusic.currentTime >= 28 && !backgroundMusicVolumeReduced) {
-                backgroundMusic.volume = 0.2;
-                backgroundMusicVolumeReduced = true;
-            }
-        });
+        // Set up background music source immediately
+        backgroundMusic.src = "Songs/Redeemer_Dawn.mp3";
 
         function togglePageMenu() {
             const pageSelector = document.getElementById('page-selector');
@@ -1214,28 +1206,15 @@
         
         // Function to handle background music
         function handleBackgroundMusic(pageNum) {
-            if (pageNum >= 1 && pageNum <= 2) {
-                // Play shallow-the-ten-tenors_cut.flac on pages 1-2
-                if (backgroundMusic.paused || !backgroundMusic.src.includes('shallow-the-ten-tenors_cut.flac')) {
-                    backgroundMusic.src = 'Songs/shallow-the-ten-tenors_cut.flac';
-                    backgroundMusic.play().catch((error) => {
-                        console.log('Background music play failed:', error);
-                    });
-                }
-            } else if (pageNum >= 11) {
-                // Start or continue playing background music on page 11 and after
-                if (backgroundMusic.paused || !backgroundMusic.src.includes('En_Prananum_En_Ayusum_Abraham_Padinjarethalackal_Basil_Jacob.m4a')) {
-                    backgroundMusic.src = 'songs/En_Prananum_En_Ayusum_Abraham_Padinjarethalackal_Basil_Jacob.m4a';
-                    backgroundMusic.play().catch((error) => {
-                        console.log('Background music play failed:', error);
-                    });
-                }
-            } else {
-                // Stop background music on pages that don't have background music
-                backgroundMusic.pause();
-                backgroundMusic.currentTime = 0;
-                backgroundMusicVolumeReduced = false; // Reset volume flag when stopping
-                backgroundMusic.volume = 1.0; // Reset to full volume for next play
+            // Play Redeemer's Dawn.mp3 on all pages
+            if (!userInteracted) {
+                userInteracted = true;
+            }
+            
+            if (backgroundMusic.paused) {
+                backgroundMusic.play().catch((error) => {
+                    console.log('Background music play failed:', error);
+                });
             }
         }
 
@@ -1412,6 +1391,15 @@
             if (newPage >= 0 && newPage < totalPages) {
                 showPage(newPage, direction);
                 currentPage = newPage;
+                
+                // Start background music when entering page 1 or keep it playing
+                if (currentPage >= 1) {
+                    if (backgroundMusic.paused) {
+                        backgroundMusic.play().catch((error) => {
+                            console.log('Background music play failed:', error);
+                        });
+                    }
+                }
             }
         }
 
