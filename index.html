@@ -1316,6 +1316,34 @@
         // Pages that have audio files
         const pagesWithAudio = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 24];
         
+        // Audio durations in seconds for each page
+        const audioDurations = {
+            1: 25.913438,
+            2: 24.476688,
+            3: 31.947750,
+            4: 29.753438,
+            5: 23.484063,
+            6: 25.338750,
+            7: 18.337938,
+            8: 23.719125,
+            9: 23.719125,
+            10: 37.694688,
+            11: 36.963250,
+            12: 35.892188,
+            13: 23.771375,
+            14: 45.688125,
+            15: 27.820375,
+            16: 30.458750,
+            17: 34.690563,
+            18: 27.768125,
+            19: 30.876688,
+            20: 32.000000,
+            21: 27.480813,
+            24: 26.174688
+        };
+        
+        let musicRestoreTimer = null;
+        
         // Fade out background music
         function fadeOutMusic(callback) {
             const currentVolume = backgroundMusic.volume;
@@ -1343,9 +1371,9 @@
         }
 
         // Fade in background music
-        function fadeInMusic() {
+        function fadeInMusic(targetVolumeOverride = null) {
             const volumeSliderValue = parseInt(volumeSlider.value);
-            const targetVolume = isMuted ? 0 : (volumeSliderValue / 100);
+            const targetVolume = targetVolumeOverride !== null ? targetVolumeOverride : (isMuted ? 0 : (volumeSliderValue / 100));
             
             if (targetVolume === 0) {
                 backgroundMusic.volume = 0;
@@ -1366,45 +1394,112 @@
             }, 50);
         }
 
+        // Clear any pending music restore timer
+        function clearMusicRestoreTimer() {
+            if (musicRestoreTimer) {
+                clearTimeout(musicRestoreTimer);
+                musicRestoreTimer = null;
+            }
+        }
+
+        // Duck background music (lower volume during narration)
+        function duckBackgroundMusic() {
+            if (backgroundMusic.paused || isMuted) return;
+            
+            const currentVolume = backgroundMusic.volume;
+            const targetVolume = currentVolume * 0.15; // Reduce to 15% of current volume
+            
+            let volume = currentVolume;
+            clearInterval(fadeInterval);
+            fadeInterval = setInterval(() => {
+                volume -= 0.03;
+                if (volume <= targetVolume) {
+                    backgroundMusic.volume = targetVolume;
+                    clearInterval(fadeInterval);
+                } else {
+                    backgroundMusic.volume = volume;
+                }
+            }, 50);
+        }
+
+        // Restore background music volume after narration
+        function restoreBackgroundMusic() {
+            if (backgroundMusic.paused || isMuted) return;
+            
+            const volumeSliderValue = parseInt(volumeSlider.value);
+            const targetVolume = volumeSliderValue / 100;
+            
+            let volume = backgroundMusic.volume;
+            clearInterval(fadeInterval);
+            fadeInterval = setInterval(() => {
+                volume += 0.03;
+                if (volume >= targetVolume) {
+                    backgroundMusic.volume = targetVolume;
+                    clearInterval(fadeInterval);
+                } else {
+                    backgroundMusic.volume = volume;
+                }
+            }, 50);
+        }
+
         // Function to handle background music
         function handleBackgroundMusic(pageNum) {
             let songToPlay = '';
             
-            // Part 1 (Pages 1–4 – Tender melancholic beginning)
-            if (pageNum >= 1 && pageNum <= 4) {
+            // Part 1 (Display Pages 1–4, Internal 0-3 – Tender melancholic beginning)
+            if (pageNum >= 0 && pageNum <= 3) {
                 songToPlay = 'Songs/Part_1.mp3';
             }
-            // Part 2 (Pages 5–9 – Deep sorrow & heartbreak)
-            else if (pageNum >= 5 && pageNum <= 9) {
+            // Part 2 (Display Pages 5–9, Internal 4-8 – Deep sorrow & heartbreak)
+            else if (pageNum >= 4 && pageNum <= 8) {
                 songToPlay = 'Songs/Part_2.mp3';
             }
-            // Part 3 (Pages 10–12 – Turning point & costly redemption)
-            else if (pageNum >= 10 && pageNum <= 12) {
+            // Part 3 (Display Pages 10–12, Internal 9-11 – Turning point & costly redemption)
+            else if (pageNum >= 9 && pageNum <= 11) {
                 songToPlay = 'Songs/Part_3.mp3';
             }
-            // Part 4 (Pages 13–15 – Reflective build toward sacrifice)
-            else if (pageNum >= 13 && pageNum <= 15) {
+            // Part 4 (Display Pages 13–15, Internal 12-14 – Reflective build toward sacrifice)
+            else if (pageNum >= 12 && pageNum <= 14) {
                 songToPlay = 'Songs/Part_4.mp3';
             }
-            // Part 5 (Pages 16–18 – Intense painful sacrifice)
-            else if (pageNum >= 16 && pageNum <= 18) {
+            // Part 5 (Display Pages 16–18, Internal 15-17 – Intense painful sacrifice)
+            else if (pageNum >= 15 && pageNum <= 17) {
                 songToPlay = 'Songs/Part_5.mp3';
             }
-            // Part 6 (Pages 19–21+24 – Powerful hopeful resolution)
-            else if ((pageNum >= 19 && pageNum <= 21) || pageNum === 24) {
+            // Part 6 (Display Pages 19–24, Internal 18-23 – Powerful hopeful resolution)
+            else if (pageNum >= 18 && pageNum <= 23) {
                 songToPlay = 'Songs/Part_6.mp3';
             }
             
+            // Get the current song filename from the full src path (handle URLs)
+            const currentSong = backgroundMusic.src ? backgroundMusic.src.split('/').pop().split('?')[0] : '';
+            const newSong = songToPlay ? songToPlay.split('/').pop().split('?')[0] : '';
+            
             // Only change the song if it's different from what's currently playing
-            if (songToPlay && !backgroundMusic.src.includes(songToPlay)) {
-                // Fade out current song, then change and fade in new song
-                fadeOutMusic(() => {
-                    backgroundMusic.src = songToPlay;
-                    backgroundMusic.play().then(() => {
+            if (songToPlay && currentSong !== newSong) {
+                // Clear any pending restore timer when changing songs
+                clearMusicRestoreTimer();
+                
+                // Stop current song completely
+                backgroundMusic.pause();
+                
+                // Change the source immediately
+                backgroundMusic.src = songToPlay;
+                backgroundMusic.currentTime = 0;
+                backgroundMusic.volume = 0; // Start at 0 for fade in
+                
+                // Play new song and fade in
+                backgroundMusic.play().then(() => {
+                    // If narration is currently playing, duck the new song immediately
+                    if (isPlaying) {
+                        const volumeSliderValue = parseInt(volumeSlider.value);
+                        const targetVolume = (volumeSliderValue / 100) * 0.15;
+                        fadeInMusic(targetVolume);
+                    } else {
                         fadeInMusic();
-                    }).catch((error) => {
-                        console.log('Background music play failed:', error);
-                    });
+                    }
+                }).catch((error) => {
+                    console.log('Background music play failed:', error);
                 });
             } else if (songToPlay && backgroundMusic.paused) {
                 // Resume if paused with fade in
@@ -1428,6 +1523,9 @@
                 clearTimeout(autoAdvanceTimer);
                 autoAdvanceTimer = null;
             }
+            
+            // Clear any pending music restore timer
+            clearMusicRestoreTimer();
 
             // Stop current audio
             audioElement.pause();
@@ -1444,6 +1542,18 @@
                 if (autoplayEnabled) {
                     audioElement.play().then(() => {
                         isPlaying = true;
+                        duckBackgroundMusic();
+                        
+                        // Schedule background music to restore 2 seconds before narration ends
+                        const duration = audioDurations[pageNum];
+                        if (duration) {
+                            clearMusicRestoreTimer();
+                            const restoreTime = Math.max(0, (duration - 2)) * 1000; // 2 seconds before end
+                            musicRestoreTimer = setTimeout(() => {
+                                restoreBackgroundMusic();
+                            }, restoreTime);
+                        }
+                        
                         updateAudioButton();
                     }).catch(() => {
                         // Auto-play blocked by browser, user needs to interact first
@@ -1471,9 +1581,23 @@
             if (isPlaying) {
                 audioElement.pause();
                 isPlaying = false;
+                clearMusicRestoreTimer();
+                restoreBackgroundMusic();
             } else {
                 audioElement.play().then(() => {
                     isPlaying = true;
+                    duckBackgroundMusic();
+                    
+                    // Schedule background music to restore 2 seconds before narration ends
+                    const duration = audioDurations[currentPage];
+                    if (duration) {
+                        clearMusicRestoreTimer();
+                        const restoreTime = Math.max(0, (duration - 2)) * 1000; // 2 seconds before end
+                        musicRestoreTimer = setTimeout(() => {
+                            restoreBackgroundMusic();
+                        }, restoreTime);
+                    }
+                    
                     updateAudioButton();
                 }).catch((error) => {
                     console.log('Audio play failed:', error);
@@ -1585,6 +1709,7 @@
         audioElement.addEventListener('ended', () => {
             isPlaying = false;
             updateAudioButton();
+            clearMusicRestoreTimer();
             
             // Automatically go to next page if not on last page
             if (currentPage < totalPages - 1) {
@@ -1667,13 +1792,18 @@
                 loadAudio(pageNum);
             }
             
-            // Handle background music
-            handleBackgroundMusic(pageNum);
+            // Handle background music only on initial load (changePage handles it otherwise)
+            if (direction === 0) {
+                handleBackgroundMusic(pageNum);
+            }
         }
 
         function changePage(direction) {
             const newPage = currentPage + direction;
             if (newPage >= 0 && newPage < totalPages) {
+                // Handle background music BEFORE page transition for immediate change
+                handleBackgroundMusic(newPage);
+                
                 showPage(newPage, direction);
                 currentPage = newPage;
                 
