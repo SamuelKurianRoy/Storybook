@@ -50,6 +50,7 @@
             position: relative;
             perspective: 2500px;
             perspective-origin: 50% 50%;
+            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3));
         }
 
         .book {
@@ -100,6 +101,111 @@
         /* Hide spine on cover page */
         .book.on-cover .book-spine {
             opacity: 0;
+        }
+
+        /* Top and bottom book binding edges */
+        .book-binding-top,
+        .book-binding-bottom {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 15px;
+            background: linear-gradient(to bottom,
+                #2a2520 0%,
+                #3a2f2a 30%,
+                #4a3f3a 50%,
+                #3a2f2a 70%,
+                #2a2520 100%
+            );
+            z-index: 101;
+            box-shadow: 
+                inset 0 2px 5px rgba(0, 0, 0, 0.4),
+                0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .book-binding-top {
+            top: 0;
+            border-bottom: 1px solid #1a1510;
+        }
+
+        .book-binding-bottom {
+            bottom: 0;
+            border-top: 1px solid #1a1510;
+        }
+
+        /* Page edges - visible thickness on sides */
+        .page-edges {
+            position: absolute;
+            top: 15px;
+            bottom: 15px;
+            width: 0;
+            z-index: 50;
+        }
+
+        .page-edges-left {
+            left: 0;
+            border-left: 8px solid #f5f0e8;
+            box-shadow: 
+                inset 2px 0 3px rgba(0, 0, 0, 0.1),
+                -2px 0 5px rgba(0, 0, 0, 0.15);
+        }
+
+        .page-edges-right {
+            right: 0;
+            border-right: 8px solid #f5f0e8;
+            box-shadow: 
+                inset -2px 0 3px rgba(0, 0, 0, 0.1),
+                2px 0 5px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Page edge layers for depth effect */
+        .page-edges::before,
+        .page-edges::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+        }
+
+        .page-edges-left::before {
+            left: -6px;
+            width: 6px;
+            background: linear-gradient(to right, #e8e3db, #f5f0e8);
+            box-shadow: -1px 0 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-edges-left::after {
+            left: -4px;
+            width: 4px;
+            background: linear-gradient(to right, #ddd8d0, #e8e3db);
+            box-shadow: -1px 0 2px rgba(0, 0, 0, 0.08);
+        }
+
+        .page-edges-right::before {
+            right: -6px;
+            width: 6px;
+            background: linear-gradient(to left, #e8e3db, #f5f0e8);
+            box-shadow: 1px 0 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-edges-right::after {
+            right: -4px;
+            width: 4px;
+            background: linear-gradient(to left, #ddd8d0, #e8e3db);
+            box-shadow: 1px 0 2px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Dynamic page edge visibility based on position */
+        .book.on-cover .page-edges-left {
+            opacity: 0;
+        }
+
+        .book.position-left .page-edges-left {
+            border-left-width: 12px;
+        }
+
+        .book.position-right .page-edges-right {
+            border-right-width: 12px;
         }
 
         /* Page spread container */
@@ -860,6 +966,25 @@
                 width: 20px;
             }
 
+            .book-binding-top,
+            .book-binding-bottom {
+                height: 10px;
+            }
+
+            .page-edges-left,
+            .page-edges-right {
+                top: 10px;
+                bottom: 10px;
+            }
+
+            .page-edges-left {
+                border-left-width: 5px;
+            }
+
+            .page-edges-right {
+                border-right-width: 5px;
+            }
+
             /* Adjust book positioning for mobile */
             .book.position-left {
                 transform: translateX(-15%);
@@ -990,6 +1115,14 @@
             <!-- Book Spine -->
             <div class="book-spine"></div>
 
+            <!-- Book binding edges (top and bottom) -->
+            <div class="book-binding-top"></div>
+            <div class="book-binding-bottom"></div>
+
+            <!-- Page edges (thickness visible on sides) -->
+            <div class="page-edges page-edges-left"></div>
+            <div class="page-edges page-edges-right"></div>
+
             <!-- Page Stacks for depth effect -->
             <div class="page-stack left">
                 <div class="stack-layer"></div>
@@ -1004,8 +1137,8 @@
 
             <!-- Cover Spread (Page 0) - Single cover page on right -->
             <div class="page-spread" id="spread-0">
-                <div class="page-half left" style="visibility: hidden;">
-                    <div class="page"></div>
+                <div class="page-half left">
+                    <div class="page" style="background: linear-gradient(135deg, #f5e9d9 0%, #e8d4b0 100%); box-shadow: none;"></div>
                 </div>
                 <div class="page-half right">
                     <div class="page cover-page">
