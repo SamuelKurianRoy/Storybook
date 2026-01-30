@@ -91,35 +91,61 @@
             color: #8b7355;
         }
 
-        /* Page loading overlay for smoother transitions */
-        .page-loading-overlay {
+        /* Smooth image transition overlay */
+        .transition-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(249, 244, 237, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
+            z-index: 50;
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out;
+            background-size: cover;
+            background-position: center;
+            border-radius: 0 10px 10px 0;
         }
 
-        .page-loading-overlay.visible {
+        .transition-overlay.active {
             opacity: 1;
-            pointer-events: auto;
         }
 
-        .page-loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(58, 47, 42, 0.2);
-            border-top-color: #8b7355;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+        .transition-overlay.fade-out {
+            opacity: 0;
+        }
+
+        .page.fade-in {
+            animation: pageFadeIn 0.6s ease-in-out forwards;
+        }
+
+        @keyframes pageFadeIn {
+            from {
+                opacity: 0.3;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Crossfade container for smooth image transitions */
+        .crossfade-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 200;
+            pointer-events: none;
+            background-size: cover;
+            background-position: center;
+            border-radius: 0 10px 10px 0;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .crossfade-layer.visible {
+            opacity: 1;
         }
 
         body {
@@ -142,6 +168,7 @@
             position: relative;
             perspective: 2000px;
             margin: auto;
+            overflow: hidden;
         }
 
         .page {
@@ -157,13 +184,15 @@
             transform-style: preserve-3d;
             transition: transform 1.2s cubic-bezier(0.645, 0.045, 0.355, 1),
                         box-shadow 1.2s cubic-bezier(0.645, 0.045, 0.355, 1),
-                        filter 0.6s ease;
+                        filter 0.6s ease,
+                        opacity 0.5s ease-in-out;
             transform-origin: left center;
             padding: 40px 40px 100px 40px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
             backface-visibility: hidden;
+            opacity: 1;
         }
 
         /* Add paper texture and depth */
@@ -1038,6 +1067,9 @@
     </div>
 
     <div class="storybook-container">
+        <!-- Crossfade layer for smooth image transitions -->
+        <div class="crossfade-layer" id="crossfade-layer"></div>
+        
         <!-- Page Navigation Menu -->
         <div class="page-nav-menu">
             <button class="jump-to-page-btn" onclick="togglePageMenu()" title="Jump to Page">
@@ -1550,6 +1582,72 @@
         });
 
         // ========================================
+        // SMOOTH CROSSFADE TRANSITION SYSTEM
+        // ========================================
+        
+        const crossfadeLayer = document.getElementById('crossfade-layer');
+        
+        // Get the background image URL for a page
+        function getPageBackgroundUrl(pageNum) {
+            return pageImageUrls[pageNum] || null;
+        }
+        
+        // Preload an image and return a promise
+        function preloadImageForCrossfade(url) {
+            return new Promise((resolve) => {
+                if (!url) {
+                    resolve(null);
+                    return;
+                }
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => resolve(null);
+                img.src = url;
+            });
+        }
+        
+        // Perform smooth crossfade transition
+        async function crossfadeToPage(fromPageNum, toPageNum) {
+            const fromUrl = getPageBackgroundUrl(fromPageNum);
+            const toUrl = getPageBackgroundUrl(toPageNum);
+            
+            // If both pages have background images, do crossfade
+            if (fromUrl && toUrl && fromUrl !== toUrl) {
+                // Set the crossfade layer to show the NEW image
+                crossfadeLayer.style.backgroundImage = `url('${toUrl}')`;
+                
+                // Start with crossfade layer invisible
+                crossfadeLayer.classList.remove('visible');
+                
+                // Small delay to ensure CSS is applied
+                await new Promise(r => setTimeout(r, 50));
+                
+                // Fade in the new image
+                crossfadeLayer.classList.add('visible');
+                
+                // Wait for the crossfade to complete
+                await new Promise(r => setTimeout(r, 800));
+                
+                // Now hide the crossfade layer (the actual page is now visible)
+                crossfadeLayer.classList.remove('visible');
+            }
+        }
+        
+        // Quick crossfade for immediate transitions
+        async function quickCrossfade(toPageNum) {
+            const toUrl = getPageBackgroundUrl(toPageNum);
+            
+            if (toUrl) {
+                crossfadeLayer.style.backgroundImage = `url('${toUrl}')`;
+                crossfadeLayer.classList.add('visible');
+                
+                await new Promise(r => setTimeout(r, 400));
+                
+                crossfadeLayer.classList.remove('visible');
+            }
+        }
+
+        // ========================================
         // MAIN APPLICATION CODE
         // ========================================
         let currentPage = 0;
@@ -2035,25 +2133,59 @@
             preloadAdjacentPages(pageNum);
             
             if (direction !== 0 && previousPageElement && currentPageElement) {
+                // Start crossfade early for smooth image transition
+                const fromUrl = getPageBackgroundUrl(currentPage);
+                const toUrl = getPageBackgroundUrl(pageNum);
+                
+                // Set up crossfade layer with the NEW image before animation starts
+                if (fromUrl && toUrl && fromUrl !== toUrl) {
+                    crossfadeLayer.style.backgroundImage = `url('${toUrl}')`;
+                    crossfadeLayer.style.opacity = '0';
+                    crossfadeLayer.classList.remove('visible');
+                }
+                
                 // Apply animation based on direction
                 if (direction > 0) {
                     // Moving forward - flip the current page away
                     previousPageElement.classList.add('page-turning');
+                    
+                    // Start crossfade during the flip animation (at 30% into animation)
+                    setTimeout(() => {
+                        if (fromUrl && toUrl && fromUrl !== toUrl) {
+                            crossfadeLayer.classList.add('visible');
+                        }
+                    }, 360); // 30% of 1200ms
                     
                     // After animation completes, hide it and show new page
                     setTimeout(() => {
                         previousPageElement.classList.remove('page-turning');
                         previousPageElement.classList.add('page-flip', 'hidden');
                         currentPageElement.classList.remove('hidden', 'page-flip');
-                        isNavigating = false;
+                        currentPageElement.classList.add('fade-in');
+                        
+                        // Remove crossfade layer after page is visible
+                        setTimeout(() => {
+                            crossfadeLayer.classList.remove('visible');
+                            currentPageElement.classList.remove('fade-in');
+                            isNavigating = false;
+                        }, 300);
                     }, 1200);
                 } else {
                     // Moving backward - first make the page we're going to visible but behind
                     currentPageElement.classList.remove('hidden', 'page-flip');
+                    currentPageElement.style.opacity = '0';
                     
                     // Make sure the current page is in flipped state before animating back
                     previousPageElement.classList.remove('hidden');
                     previousPageElement.classList.add('page-flip');
+                    
+                    // Start crossfade during backward animation
+                    setTimeout(() => {
+                        if (fromUrl && toUrl && fromUrl !== toUrl) {
+                            crossfadeLayer.classList.add('visible');
+                        }
+                        currentPageElement.style.opacity = '1';
+                    }, 360);
                     
                     // Small delay to ensure the flip state is applied
                     setTimeout(() => {
@@ -2064,7 +2196,13 @@
                     setTimeout(() => {
                         previousPageElement.classList.remove('page-turning-back', 'page-flip');
                         previousPageElement.classList.add('hidden');
-                        isNavigating = false;
+                        currentPageElement.classList.add('fade-in');
+                        
+                        setTimeout(() => {
+                            crossfadeLayer.classList.remove('visible');
+                            currentPageElement.classList.remove('fade-in');
+                            isNavigating = false;
+                        }, 300);
                     }, 1200);
                 }
             } else {
@@ -2074,6 +2212,7 @@
                     if (page) {
                         if (i === pageNum) {
                             page.classList.remove('hidden', 'page-flip', 'page-turning', 'page-turning-back');
+                            page.style.opacity = '1';
                         } else {
                             page.classList.add('hidden');
                             if (i < pageNum) {
