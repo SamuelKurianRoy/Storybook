@@ -9,11 +9,117 @@
     <title>Hosea and Gomer - A Story of Unfailing Love</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Preload images for faster loading and caching -->
+    <link rel="preload" href="Cover.png" as="image">
+    <link rel="preload" href="Images/1.png" as="image">
+    <link rel="preload" href="Images/2.png" as="image">
+    <link rel="preload" href="Images/3.png" as="image">
+    <link rel="preload" href="Images/4.png" as="image">
+    <link rel="preload" href="Images/5.png" as="image">
+    <link rel="preload" href="Images/6.png" as="image">
+    <link rel="preload" href="Images/7.png" as="image">
+    <link rel="preload" href="Images/8.png" as="image">
+    <link rel="preload" href="Images/9.png" as="image">
+    <link rel="preload" href="Images/10.png" as="image">
+    <link rel="preload" href="Images/11.png" as="image">
+    <link rel="preload" href="Images/12.png" as="image">
+    <link rel="preload" href="Images/13.png" as="image">
+    <link rel="preload" href="Images/14.png" as="image">
+    <link rel="preload" href="Images/15.png" as="image">
+    <link rel="preload" href="Images/16.png" as="image">
+    <link rel="preload" href="Images/17.png" as="image">
+    <link rel="preload" href="Images/18.png" as="image">
+    <link rel="preload" href="Images/19.png" as="image">
+    <link rel="preload" href="Images/20.png" as="image">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        /* Loading screen styles */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f5e9d9 0%, #e8d4b0 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease-out;
+        }
+
+        #loading-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(58, 47, 42, 0.2);
+            border-top-color: #8b7355;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5em;
+            color: #3a2f2a;
+            margin-bottom: 10px;
+        }
+
+        .loading-progress {
+            font-family: 'Crimson Text', serif;
+            font-size: 1em;
+            color: #8b7355;
+        }
+
+        /* Page loading overlay for smoother transitions */
+        .page-loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(249, 244, 237, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .page-loading-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .page-loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(58, 47, 42, 0.2);
+            border-top-color: #8b7355;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
 
         body {
@@ -922,6 +1028,15 @@
     </style>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading Storybook...</div>
+            <div class="loading-progress" id="loading-progress">0 / 21 images loaded</div>
+        </div>
+    </div>
+
     <div class="storybook-container">
         <!-- Page Navigation Menu -->
         <div class="page-nav-menu">
@@ -1262,6 +1377,181 @@
     </div>
 
     <script>
+        // ========================================
+        // INTELLIGENT IMAGE CACHING & PRELOADING
+        // ========================================
+        
+        // Image cache object - stores loaded images
+        const imageCache = new Map();
+        
+        // Map page numbers to their image URLs
+        const pageImageUrls = {
+            0: 'Cover.png',
+            1: 'Images/1.png',
+            2: 'Images/2.png',
+            3: 'Images/3.png',
+            4: 'Images/4.png',
+            5: 'Images/5.png',
+            6: 'Images/6.png',
+            7: 'Images/7.png',
+            8: 'Images/8.png',
+            9: 'Images/9.png',
+            10: 'Images/10.png',
+            11: 'Images/11.png',
+            12: 'Images/12.png',
+            13: 'Images/13.png',
+            14: 'Images/14.png',
+            15: 'Images/15.png',
+            16: 'Images/16.png',
+            17: 'Images/17.png',
+            18: 'Images/18.png',
+            19: 'Images/19.png',
+            20: 'Images/20.png',
+            21: 'Images/21.png',
+            22: 'Images/22.png',
+            23: 'Images/23.png',
+            24: 'Images/24.png'
+        };
+        
+        const loadingScreen = document.getElementById('loading-screen');
+        const loadingProgress = document.getElementById('loading-progress');
+        
+        // Number of pages to preload ahead and behind
+        const PRELOAD_AHEAD = 3;
+        const PRELOAD_BEHIND = 2;
+        
+        // Track loading state
+        let initialLoadComplete = false;
+        let isNavigating = false;
+        
+        // Load a single image and cache it
+        function loadImage(pageNum) {
+            const url = pageImageUrls[pageNum];
+            if (!url) return Promise.resolve(null);
+            
+            // Check if already cached
+            if (imageCache.has(pageNum)) {
+                return Promise.resolve(imageCache.get(pageNum));
+            }
+            
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    imageCache.set(pageNum, img);
+                    resolve(img);
+                };
+                img.onerror = () => {
+                    console.warn(`Failed to load image for page ${pageNum}: ${url}`);
+                    // Cache as null to avoid retrying
+                    imageCache.set(pageNum, null);
+                    resolve(null);
+                };
+                img.src = url;
+            });
+        }
+        
+        // Check if an image is already cached
+        function isImageCached(pageNum) {
+            return imageCache.has(pageNum);
+        }
+        
+        // Preload images for pages around the current page
+        function preloadAdjacentPages(currentPageNum) {
+            const pagesToPreload = [];
+            
+            // Preload pages ahead (higher priority)
+            for (let i = 1; i <= PRELOAD_AHEAD; i++) {
+                const pageNum = currentPageNum + i;
+                if (pageNum < 25 && !isImageCached(pageNum)) {
+                    pagesToPreload.push(pageNum);
+                }
+            }
+            
+            // Preload pages behind (lower priority)
+            for (let i = 1; i <= PRELOAD_BEHIND; i++) {
+                const pageNum = currentPageNum - i;
+                if (pageNum >= 0 && !isImageCached(pageNum)) {
+                    pagesToPreload.push(pageNum);
+                }
+            }
+            
+            // Start preloading in the background (don't await)
+            pagesToPreload.forEach(pageNum => {
+                loadImage(pageNum);
+            });
+        }
+        
+        // Ensure a specific page's image is loaded before showing
+        async function ensurePageImageLoaded(pageNum) {
+            if (!pageImageUrls[pageNum]) return true;
+            
+            if (isImageCached(pageNum)) {
+                return true;
+            }
+            
+            // Load the image and wait for it
+            await loadImage(pageNum);
+            return true;
+        }
+        
+        // Initial load - load first few pages to get started quickly
+        async function initialPreload() {
+            const initialPages = [0, 1, 2, 3]; // Cover and first 3 pages
+            let loaded = 0;
+            
+            loadingProgress.textContent = `Loading initial pages...`;
+            
+            for (const pageNum of initialPages) {
+                await loadImage(pageNum);
+                loaded++;
+                loadingProgress.textContent = `${loaded} / ${initialPages.length} initial pages loaded`;
+            }
+            
+            initialLoadComplete = true;
+            
+            // Hide loading screen
+            setTimeout(() => {
+                loadingScreen.classList.add('fade-out');
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }, 200);
+            
+            // Continue preloading remaining pages in background
+            preloadRemainingPages();
+        }
+        
+        // Preload remaining pages in background after initial load
+        function preloadRemainingPages() {
+            const remainingPages = [];
+            for (let i = 0; i < 25; i++) {
+                if (!isImageCached(i)) {
+                    remainingPages.push(i);
+                }
+            }
+            
+            // Load remaining pages sequentially in background
+            let index = 0;
+            function loadNext() {
+                if (index >= remainingPages.length) return;
+                const pageNum = remainingPages[index];
+                loadImage(pageNum).then(() => {
+                    index++;
+                    // Small delay to not overwhelm the browser
+                    setTimeout(loadNext, 100);
+                });
+            }
+            loadNext();
+        }
+        
+        // Start initial preload when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            initialPreload();
+        });
+
+        // ========================================
+        // MAIN APPLICATION CODE
+        // ========================================
         let currentPage = 0;
         const totalPages = 25; // Cover + 24 pages
         const audioElement = document.getElementById('page-audio');
@@ -1297,14 +1587,22 @@
             }
         }
 
-        function jumpToPage() {
+        async function jumpToPage() {
+            if (isNavigating) return;
+            
             const pageSelector = document.getElementById('page-selector');
             const selectedPage = parseInt(pageSelector.value);
             
             if (selectedPage !== currentPage && selectedPage >= 0 && selectedPage < totalPages) {
+                isNavigating = true;
+                
                 // Calculate direction for animation
                 const direction = selectedPage > currentPage ? 1 : -1;
-                showPage(selectedPage, direction);
+                
+                // Handle background music change
+                handleBackgroundMusic(selectedPage);
+                
+                await showPage(selectedPage, direction);
                 currentPage = selectedPage;
             }
             
@@ -1568,7 +1866,7 @@
                 // Auto-advance after 15 seconds for pages without audio (22, 23) if autoplay is on
                 if (autoplayEnabled && (pageNum === 22 || pageNum === 23)) {
                     autoAdvanceTimer = setTimeout(() => {
-                        if (currentPage < totalPages - 1) {
+                        if (currentPage < totalPages - 1 && !isNavigating) {
                             changePage(1);
                         }
                     }, 15000); // 15 seconds
@@ -1711,8 +2009,8 @@
             updateAudioButton();
             clearMusicRestoreTimer();
             
-            // Automatically go to next page if not on last page
-            if (currentPage < totalPages - 1) {
+            // Automatically go to next page if not on last page and not currently navigating
+            if (currentPage < totalPages - 1 && !isNavigating) {
                 setTimeout(() => {
                     changePage(1);
                 }, 500); // Small delay before transitioning
@@ -1726,9 +2024,15 @@
             updateAudioButton();
         });
 
-        function showPage(pageNum, direction = 0) {
+        async function showPage(pageNum, direction = 0) {
             const previousPageElement = document.getElementById(`page-${currentPage}`);
             const currentPageElement = document.getElementById(`page-${pageNum}`);
+            
+            // Ensure the target page's image is loaded before animation
+            await ensurePageImageLoaded(pageNum);
+            
+            // Also preload adjacent pages for smooth future navigation
+            preloadAdjacentPages(pageNum);
             
             if (direction !== 0 && previousPageElement && currentPageElement) {
                 // Apply animation based on direction
@@ -1741,6 +2045,7 @@
                         previousPageElement.classList.remove('page-turning');
                         previousPageElement.classList.add('page-flip', 'hidden');
                         currentPageElement.classList.remove('hidden', 'page-flip');
+                        isNavigating = false;
                     }, 1200);
                 } else {
                     // Moving backward - first make the page we're going to visible but behind
@@ -1759,6 +2064,7 @@
                     setTimeout(() => {
                         previousPageElement.classList.remove('page-turning-back', 'page-flip');
                         previousPageElement.classList.add('hidden');
+                        isNavigating = false;
                     }, 1200);
                 }
             } else {
@@ -1778,6 +2084,7 @@
                         }
                     }
                 }
+                isNavigating = false;
             }
 
             // Update page indicator
@@ -1798,13 +2105,18 @@
             }
         }
 
-        function changePage(direction) {
+        async function changePage(direction) {
+            // Prevent multiple rapid page changes during animation
+            if (isNavigating) return;
+            
             const newPage = currentPage + direction;
             if (newPage >= 0 && newPage < totalPages) {
+                isNavigating = true;
+                
                 // Handle background music BEFORE page transition for immediate change
                 handleBackgroundMusic(newPage);
                 
-                showPage(newPage, direction);
+                await showPage(newPage, direction);
                 currentPage = newPage;
                 
                 // Start background music when entering page 1 or keep it playing
@@ -1824,6 +2136,8 @@
 
         // Keyboard navigation
         document.addEventListener('keydown', function(event) {
+            if (isNavigating) return; // Prevent rapid key presses
+            
             if (event.key === 'ArrowLeft') {
                 changePage(-1);
             } else if (event.key === 'ArrowRight') {
@@ -1845,6 +2159,8 @@
         });
 
         function handleSwipe() {
+            if (isNavigating) return; // Prevent swipe during navigation
+            
             if (touchEndX < touchStartX - 50) {
                 changePage(1); // Swipe left - next page
             }
