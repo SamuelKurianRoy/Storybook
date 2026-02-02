@@ -1455,6 +1455,23 @@
                 </div>
             </div>
 
+            <!-- Spread 13 (Back Cover) -->
+            <div class="page-spread hidden" id="spread-13">
+                <div class="page-half left">
+                    <div class="page cover-page" style="background: linear-gradient(135deg, #5d4037 0%, #3e2723 100%);">
+                        <h1 style="font-size: 2.5rem;">Hosea and Gomer</h1>
+                        <div class="subtitle" style="font-size: 1.1rem;">A Story of Unfailing Love</div>
+                        <div style="margin-top: 60px; font-size: 1rem; color: #f5e9d9; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);">
+                            <p style="margin-bottom: 15px;">A timeless tale of redemption</p>
+                            <p>Created by Samuel Kurian Roy</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="page-half right">
+                    <div class="page" style="background: linear-gradient(135deg, #f5e9d9 0%, #e8d4b0 100%); box-shadow: none;"></div>
+                </div>
+            </div>
+
             <!-- Navigation Controls -->
             <div class="page-nav-menu">
                 <button class="jump-to-page-btn" onclick="togglePageMenu()" title="Jump to Page">
@@ -1474,6 +1491,7 @@
                     <option value="10">Pages 19-20: The Agony</option>
                     <option value="11">Pages 21-22: Redeeming Love</option>
                     <option value="12">Pages 23-24: The End</option>
+                    <option value="13">Back Cover</option>
                 </select>
             </div>
 
@@ -1517,7 +1535,7 @@
 
     <script>
         let currentSpread = 0;
-        const totalSpreads = 13;
+        const totalSpreads = 14;
         const audioElement = document.getElementById('page-audio');
         const backgroundMusic = document.getElementById('background-music');
         let isPlaying = false;
