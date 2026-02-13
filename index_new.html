@@ -142,10 +142,17 @@
             background-image: url("https://www.transparenttextures.com/patterns/linen-paper.png");
         }
         
+        /* Show front when page is not flipped */
+        .page:not(.flipped) .page-front {
+            opacity: 1;
+            visibility: visible;
+        }
+        
         /* Hide front when page is flipped */
         .page.flipped .page-front {
             opacity: 0;
             pointer-events: none;
+            visibility: hidden;
         }
 
         .page-back {
@@ -155,18 +162,19 @@
             z-index: 1;
             top: 0;
             left: 0;
-            direction: rtl;
         }
         
         /* Hide back when page is not flipped */
         .page:not(.flipped) .page-back {
             opacity: 0;
             pointer-events: none;
+            visibility: hidden;
         }
         
         /* Show back when page is flipped */
         .page.flipped .page-back {
             opacity: 1;
+            visibility: visible;
         }
         
         .page-back .page-content,
@@ -178,7 +186,6 @@
         .page-back .references,
         .page-back .divider,
         .page-back .pigment-wash {
-            direction: ltr;
             transform: scaleX(-1);
         }
 
