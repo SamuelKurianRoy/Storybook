@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Samuel Kurian Roy">
+    <meta name="description" content="A digital storybook written by Samuel Kurian Roy.">
+    <meta name="google-site-verification" content="V93p3d8kjwpqLx6T9Z8tIDA0wfcCkiuJUcC-GIsvvBI" />
+    <title>Hosea and Gomer - A Story of Unfailing Love</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,800;1,9..40,400&family=JetBrains+Mono:wght@300;500&family=Playfair+Display:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --pigment-ochre: #c48c46;
+            --pigment-clay: #8e4a31;
+            --pigment-indigo: #2c364c;
+            --pigment-ash: #e8e4db;
+            --pigment-charcoal: #1a1817;
+            --page-width: 420px;
+            --page-height: 580px;
+            --transition-speed: 0.8s;
+            --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        @media (max-width: 900px) {
+            :root {
+                --page-width: 85vw;
+                --page-height: 70vh;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--pigment-charcoal);
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(142, 74, 49, 0.15), transparent),
+                url("https://www.transparenttextures.com/patterns/dark-matter.png");
+            font-family: 'Crimson Text', serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            perspective: 2500px;
+            color: var(--pigment-ash);
+        }
+
+        /* SVG Grain Filter Overlay */
+        .grain-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.4;
+            mix-blend-mode: overlay;
+        }
+
+        /* The Book Container */
+        .book {
+            width: var(--page-width);
+            height: var(--page-height);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1.2s var(--ease-out-expo);
+            cursor: pointer;
+        }
+
+        .book.opened {
+            transform: translateX(25%) rotateY(-10deg);
+        }
+
+        @media (max-width: 900px) {
+            .book.opened {
+                transform: rotateY(-10deg);
+            }
+        }
+
+        /* Page Mechanics */
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform var(--transition-speed) var(--ease-out-expo);
+            background: var(--pigment-ash);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            pointer-events: auto;
+            overflow: hidden;
+        }
+        
+        .page.flipped {
+            pointer-events: none;
+        }
+
+        .page-side {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            padding: 2.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Custom scrollbar */
+        .page-side::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .page-side::-webkit-scrollbar-track {
+            background: rgba(141, 110, 99, 0.1);
+            border-radius: 3px;
+        }
+
+        .page-side::-webkit-scrollbar-thumb {
+            background: rgba(141, 110, 99, 0.4);
+            border-radius: 3px;
+        }
+
+        .page-side::-webkit-scrollbar-thumb:hover {
+            background: rgba(141, 110, 99, 0.6);
+        }
+
+        .page-front {
+            z-index: 2;
+            background: var(--pigment-ash);
+            background-image: url("https://www.transparenttextures.com/patterns/linen-paper.png");
+        }
+
+        .page-back {
+            transform: rotateY(180deg);
+            background: var(--pigment-ash);
+            background-image: url("https://www.transparenttextures.com/patterns/linen-paper.png");
+            z-index: 1;
+            top: 0;
+            left: 0;
+            direction: rtl;
+        }
+        
+        .page-back .page-content,
+        .page-back .chapter-label,
+        .page-back .page-num,
+        .page-back h2,
+        .page-back p,
+        .page-back .scripture,
+        .page-back .references,
+        .page-back .divider,
+        .page-back .pigment-wash {
+            direction: ltr;
+            transform: scaleX(-1);
+        }
+
+        /* Cover Specifics */
+        .cover-front {
+            background-color: var(--pigment-clay);
+            color: var(--pigment-ash);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 4rem 2rem;
+            border-left: 15px solid rgba(0,0,0,0.2);
+            background-image: 
+                linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%),
+                url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+
+        .cover-front h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            margin-bottom: 1rem;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .cover-front .sub {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+        }
+
+        .cover-front .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cover-front .author {
+            font-size: 0.9rem;
+            opacity: 0.6;
+            margin-top: 2rem;
+        }
+
+        /* Page with Background Image */
+        .bg-page {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+
+        .bg-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(232, 228, 219, 0.85), rgba(232, 228, 219, 0.95));
+            z-index: 0;
+        }
+
+        .bg-page .page-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Typographic Layouts */
+        .page-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            position: absolute;
+            bottom: 2rem;
+            right: 2.5rem;
+            color: var(--pigment-clay);
+        }
+
+        .chapter-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            color: var(--pigment-clay);
+            margin-bottom: 1.5rem;
+            display: block;
+            border-bottom: 1px solid var(--pigment-ochre);
+            padding-bottom: 0.5rem;
+            width: fit-content;
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--pigment-indigo);
+            margin-bottom: 1.2rem;
+            line-height: 1.2;
+        }
+
+        p {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #3d3d3d;
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+
+        .drop-cap {
+            float: left;
+            font-size: 3.5rem;
+            line-height: 0.9;
+            padding-right: 0. 5rem;
+            padding-top: 0.15rem;
+            font-weight: 800;
+            color: var(--pigment-clay);
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Abstract Pigment Art */
+        .pigment-wash {
+            height: 120px;
+            width: 100%;
+            background: var(--pigment-ochre);
+            margin: 1.5rem 0;
+            clip-path: polygon(0% 15%, 100% 0%, 100% 85%, 0% 100%);
+            opacity: 0.6;
+            mix-blend-mode: multiply;
+        }
+
+        .pigment-wash.alt {
+            background: var(--pigment-indigo);
+            clip-path: polygon(0% 0%, 100% 15%, 100% 100%, 0% 85%);
+        }
+
+        .scripture {
+            font-style: italic;
+            padding: 1rem;
+            background-color: rgba(141, 110, 99, 0.15);
+            border-left: 3px solid var(--pigment-ochre);
+            margin: 1.2rem 0;
+            font-size: 0.95rem;
+            color: #3d3d3d;
+        }
+
+        .references {
+            font-size: 0.9rem;
+        }
+
+        .references h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .references ul {
+            list-style-type: none;
+            padding-left: 1rem;
+        }
+
+        .references li {
+            margin-bottom: 0.7rem;
+            line-height: 1.5;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--pigment-ochre), transparent);
+            margin: 1.5rem 0;
+        }
+
+        /* State Classes */
+        .flipped {
+            transform: rotateY(-180deg);
+        }
+
+        /* Interface Elements */
+        .controls {
+            position: fixed;
+            bottom: 40px;
+            display: flex;
+            gap: 2rem;
+            z-index: 2000;
+            align-items: center;
+        }
+
+        .page-indicator {
+            background: transparent;
+            border: 1px solid var(--pigment-ochre);
+            color: var(--pigment-ochre);
+            padding: 0.5rem 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--pigment-ochre);
+            color: var(--pigment-ochre);
+            padding: 0.8rem 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--pigment-ochre);
+            color: var(--pigment-ash);
+        }
+
+        button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Audio Controls */
+        .audio-controls {
+            position: fixed;
+            top: 40px;
+            right: 40px;
+            display: flex;
+            gap: 1rem;
+            z-index: 2000;
+            flex-wrap: wrap;
+        }
+
+        .audio-btn {
+            background: transparent;
+            border: 1px solid var(--pigment-ochre);
+            color: var(--pigment-ochre);
+            padding: 0.7rem 1.2rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .audio-btn:hover {
+            background: var(--pigment-ochre);
+            color: var(--pigment-ash);
+        }
+
+        .audio-btn.active {
+            background: var(--pigment-ochre);
+            color: var(--pigment-ash);
+        }
+
+        .audio-btn.disabled {
+            opacity: 0.5;
+        }
+
+        .audio-btn.muted {
+            opacity: 0.6;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+
+        .volume-slider {
+            width: 80px;
+            height: 4px;
+            background: rgba(196, 140, 70, 0.3);
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: var(--pigment-ochre);
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        .volume-icon {
+            color: var(--pigment-ochre);
+            font-size: 0.9rem;
+        }
+
+        /* Page Navigation Menu */
+        .page-nav-menu {
+            position: fixed;
+            top: 40px;
+            left: 40px;
+            z-index: 2000;
+        }
+
+        .jump-to-page-btn {
+            background: transparent;
+            border: 1px solid var(--pigment-ochre);
+            color: var(--pigment-ochre);
+            padding: 0.7rem 1.2rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 5px;
+        }
+
+        .jump-to-page-btn:hover {
+            background: var(--pigment-ochre);
+            color: var(--pigment-ash);
+        }
+
+        .page-select {
+            display: none;
+            position: absolute;
+            top: 50px;
+            left: 0;
+            background: rgba(26, 24, 23, 0.95);
+            border: 1px solid var(--pigment-ochre);
+            color: var(--pigment-ash);
+            padding: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            cursor: pointer;
+            border-radius: 5px;
+            min-width: 250px;
+        }
+
+        .page-select.show {
+            display: block;
+        }
+
+        .page-select option {
+            padding: 0.5rem;
+            background: rgba(26, 24, 23, 0.95);
+            color: var(--pigment-ash);
+        }
+
+        /* Responsive handling for 3D overlap */
+        @media (max-width: 900px) {
+            .book {
+                transform-origin: center;
+            }
+
+            .audio-controls {
+                top: 20px;
+                right: 20px;
+                gap: 0.5rem;
+                flex-direction: column;
+                align-items: flex-end;
+            }
+
+            .page-nav-menu {
+                top: 20px;
+                left: 20px;
+            }
+
+            .controls {
+                bottom: 20px;
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .page-side {
+                padding: 2rem 1.5rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            p {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .audio-controls {
+                gap: 0.3rem;
+            }
+
+            .audio-btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .volume-control {
+                padding: 0.3rem 0.6rem;
+            }
+
+            .volume-slider {
+                width: 60px;
+            }
+
+            button {
+                padding: 0.6rem 1rem;
+                font-size: 0.65rem;
+            }
+
+            .page-indicator {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.6rem;
+            }
+
+            .page-side {
+                padding: 1.5rem 1.2rem;
+            }
+
+            h2 {
+                font-size: 1.3rem;
+            }
+
+            p {
+                font-size: 0.9rem;
+            }
+
+            .drop-cap {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <svg class="grain-overlay" viewBox="0 0 100 100">
+        <filter id="noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+            <feColorMatrix type="saturate" values="0" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#noise)" />
+    </svg>
+
+    <div class="book" id="book">
+        
+        <!-- COVER PAGE -->
+        <div class="page" id="page-0">
+            <div class="page-side page-front cover-front">
+                <div class="sub">A Prophet's Lament</div>
+                <h1>Hosea & Gomer</h1>
+                <div class="subtitle">A Story of Unfailing Love</div>
+                <div class="author">Created by Samuel Kurian Roy</div>
+                <p style="color: var(--pigment-ash); opacity: 0.5; font-size: 0.75rem; margin-top: 2rem;">Click Next or tap to begin</p>
+            </div>
+            <div class="page-side page-back">
+                <span class="chapter-label">Chapter I</span>
+                <h2>The Prophet's Calling</h2>
+                <div class="pigment-wash"></div>
+                <p><span class="drop-cap">T</span>he prophet Hosea lived a quiet life, his days filled with prayer and the study of sacred scrolls. His heart was a still pool, reflecting the heavens. But one day, a voice, deep and resonant as thunder, broke the silence.</p>
+                <p>"Go," it commanded. "Take for yourself a wife of harlotry and have children of harlotry, for the land commits great harlotry by forsaking its God."</p>
+                <span class="page-num">01</span>
+            </div>
+        </div>
+
+        <!-- PAGE 1 -->
+        <div class="page" id="page-1">
+            <div class="page-side page-front bg-page" style="background-image: url('Images/2.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter II</span>
+                    <h2>Meeting Gomer</h2>
+                    <p><span class="drop-cap">H</span>is steps led him to the city's edge, to a house where laughter spilled like cheap wine. There he found Gomer. She was a flame in the darkness, her eyes holding both a desperate hunger and a deep-seated weariness.</p>
+                    <p>When Hosea spoke her name and asked for her hand, she laughed, a sound as brittle as dry leaves. But in his gaze, she saw not judgment, but a strange and steady tenderness. She said yes.</p>
+                </div>
+                <span class="page-num">02</span>
+            </div>
+            <div class="page-side page-back bg-page" style="background-image: url('Images/3.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter III</span>
+                    <h2>A Quiet Harbor</h2>
+                    <div class="pigment-wash alt"></div>
+                    <p><span class="drop-cap">F</span>or a time, Hosea's love was a strange and quiet harbor. A son was born to them, a child of their union, and God commanded he be named Jezreel, for a valley of judgment.</p>
+                    <p>This firstborn, Hosea's own son, was a prophecy of sorrow, a shadow falling over their new family. But the quiet of Hosea's home felt like a cage to Gomer, and her eyes began to stray back toward the wild, chaotic life she had known.</p>
+                </div>
+                <span class="page-num">03</span>
+            </div>
+        </div>
+
+        <!-- PAGE 2 -->
+        <div class="page" id="page-2">
+            <div class="page-side page-front bg-page" style="background-image: url('Images/4.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter IV</span>
+                    <h2>The First Betrayal</h2>
+                    <p><span class="drop-cap">G</span>omer's restlessness gave way to betrayal. She sought out her old lovers, and soon she bore a daughter, a child not of Hosea's blood.</p>
+                    <p>God's voice came again, cold as iron: "Name her Lo-ruhamah, for she is 'Not Pitied,' and I will no longer have pity on my people." The child was a living testament to Gomer's unfaithfulness, a constant pain in Hosea's home.</p>
+                </div>
+                <span class="page-num">04</span>
+            </div>
+            <div class="page-side page-back bg-page" style="background-image: url('Images/5.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter V</span>
+                    <h2>Deepening Shame</h2>
+                    <div class="pigment-wash"></div>
+                    <p><span class="drop-cap">T</span>he shame deepened. After weaning her daughter, Gomer bore another son, also not of Hosea's line. The command from God was the final, devastating blow: "Name him Lo-ammi, for he is 'Not My People,' and I am not your God."</p>
+                    <p>One night, Gomer vanished, leaving Hosea with his son Jezreel and the two children of her unfaithfulness, a house full of broken covenants.</p>
+                </div>
+                <span class="page-num">05</span>
+            </div>
+        </div>
+
+        <!-- PAGE 3 -->
+        <div class="page" id="page-3">
+            <div class="page-side page-front bg-page" style="background-image: url('Images/6.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter VI</span>
+                    <h2>A Spectacle of Shame</h2>
+                    <p><span class="drop-cap">H</span>osea's life became a spectacle of shame. He raised his own son and the two children of Gomer's adultery alone. Their names were a constant sermon to the townspeople who whispered behind his back.</p>
+                    <p>Jezreel, Lo-ruhamah, Lo-ammi. Judgment, No Pity, Not My People. Every time he called to them, he preached his own heartbreak and his nation's sin. His love for them was real, but it was a love steeped in grief.</p>
+                </div>
+                <span class="page-num">06</span>
+            </div>
+            <div class="page-side page-back bg-page" style="background-image: url('Images/7.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter VII</span>
+                    <h2>Years Passed</h2>
+                    <div class="pigment-wash alt"></div>
+                    <p><span class="drop-cap">Y</span>ears passed. Gomer's beauty, once a burning torch, faded to a guttering wick. The men who had desired her grew tired of her. She fell into debt, her freedom sold to settle her accounts.</p>
+                    <p>She became a possession, passed from one master to another, her spirit worn as thin as her ragged clothes.</p>
+                </div>
+                <span class="page-num">07</span>
+            </div>
+        </div>
+
+        <!-- PAGE 4 -->
+        <div class="page" id="page-4">
+            <div class="page-side page-front bg-page" style="background-image: url('Images/8.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter VIII</span>
+                    <h2>The Second Command</h2>
+                    <p><span class="drop-cap">T</span>hen the voice came to Hosea again, not in thunder, but in a whisper that shook his soul. "Go again, love a woman who is loved by another man and is an adulteress."</p>
+                    <p>The command was absurd, impossible. It meant loving the source of his deepest pain. It meant loving Gomer.</p>
+                </div>
+                <span class="page-num">08</span>
+            </div>
+            <div class="page-side page-back bg-page" style="background-image: url('Images/9.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter IX</span>
+                    <h2>Redemption</h2>
+                    <div class="pigment-wash"></div>
+                    <p><span class="drop-cap">H</span>e found her in the slave market. She stood on the auction block, her head bowed in shame. Hosea stepped forward. "I will buy her," he said, his voice clear and strong.</p>
+                    <p>He paid the price—fifteen shekels of silver and a homer and a lethech of barley—the full price for a common slave.</p>
+                </div>
+                <span class="page-num">09</span>
+            </div>
+        </div>
+
+        <!-- PAGE 5 -->
+        <div class="page" id="page-5">
+            <div class="page-side page-front bg-page" style="background-image: url('Images/10.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter X</span>
+                    <h2>Beginning of Healing</h2>
+                    <p><span class="drop-cap">H</span>e brought her home. Not as a slave, but as his wife. He looked at her, at the ruins of the woman he had married, and said, "You must stay with me for many days; you shall not play the harlot, or belong to another man. So I will also be to you."</p>
+                    <p>It was not the end of the pain, but the beginning of a long healing. It was a love that refused to let go, a love that bought back what was broken and promised, in the quiet darkness, the hope of a new dawn.</p>
+                </div>
+                <span class="page-num">10</span>
+            </div>
+            <div class="page-side page-back bg-page" style="background-image: url('Images/11.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter XI</span>
+                    <h2>The Nature of Love</h2>
+                    <div class="scripture">
+                        Love is patient, love is kind. It does not envy, it does not boast, it is not proud. It does not dishonor others, it is not self-seeking, it is not easily angered, it keeps no record of wrongs. Love does not delight in evil but rejoices with the truth. It always protects, always trusts, always hopes, always perseveres. Love never fails.
+                    </div>
+                    <p style="text-align: right; font-style: italic; font-size: 0.9rem;">— 1 Corinthians 13:4-8a</p>
+                </div>
+                <span class="page-num">11</span>
+            </div>
+        </div>
+
+        <!-- PAGE 6 -->
+        <div class="page" id="page-6">
+            <div class="page-side page-front bg-page" style="background-image: url('Images/12.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter XII</span>
+                    <h2>What Gomer Deserved</h2>
+                    <div class="pigment-wash alt"></div>
+                    <p><span class="drop-cap">W</span>hat did Gomer truly deserve? By the law of her people and the word of God, her path should have been walled with thorns. She should have been stripped bare, her shame exposed to the lovers she chased.</p>
+                    <p>The grain, the wine, the oil—all the gifts she took for granted—should have been taken away, leaving her like a parched desert, a ruined vineyard. Her feasts should have turned to mourning. This was the judgment for her betrayal, the bitter harvest of her choices.</p>
+                </div>
+                <span class="page-num">12</span>
+            </div>
+            <div class="page-side page-back bg-page" style="background-image: url('Images/13.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter XIII</span>
+                    <h2>The Parallel to Christ</h2>
+                    <p><span class="drop-cap">T</span>his story, etched in the lives of a prophet and his unfaithful wife, is not just about them. It is a mirror reflecting a much larger love story.</p>
+                    <p>Hosea, in his unwavering, pursuing love, is a living picture of God. His heart, broken by betrayal, mirrors the grief of a Creator whose people turn away.</p>
+                </div>
+                <span class="page-num">13</span>
+            </div>
+        </div>
+
+        <!-- PAGE 7 -->
+        <div class="page" id="page-7">
+            <div class="page-side page-front bg-page" style="background-image: url('Images/14.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter XIV</span>
+                    <h2>Humanity's Betrayal</h2>
+                    <p><span class="drop-cap">A</span>nd Gomer, in her restlessness and her constant search for something more, represents humanity. We, too, chase after fleeting pleasures and empty promises, forgetting the source of all true love and provision.</p>
+                    <p>We take the gifts of life—the grain, the wine, the oil—and forget the Giver, offering our hearts to lesser things. Our sins are like Gomer's adultery. Each time we choose our own way, we break the heart of God.</p>
+                    <p>We wander from the safety of His love, selling ourselves into the slavery of sin, ending up broken and ashamed on an auction block of our own making.</p>
+                </div>
+                <span class="page-num">14</span>
+            </div>
+            <div class="page-side page-back bg-page" style="background-image: url('Images/15.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter XV</span>
+                    <h2>God's Pursuit</h2>
+                    <div class="pigment-wash"></div>
+                    <p><span class="drop-cap">B</span>ut the story does not end in judgment. Just as Hosea went to the slave market, God, in His infinite mercy, came to find us. He did not wait for us to be worthy.</p>
+                    <p>He came to the auction block of our shame and paid the ultimate price to buy us back. Not with silver or barley, but with the precious blood of his Son, Jesus.</p>
+                </div>
+                <span class="page-num">15</span>
+            </div>
+        </div>
+
+        <!-- PAGE 8 -->
+        <div class="page" id="page-8">
+            <div class="page-side page-front bg-page" style="background-image: url('Images/16.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter XVI</span>
+                    <h2>The Ultimate Price Paid</h2>
+                    <p><span class="drop-cap">G</span>omer was never made to pay the full price for her sin. She deserved to be stripped naked, her shame put on public display. But she was spared.</p>
+                    <p>Instead, Jesus, who was without any sin, took her punishment. He was the one stripped of all his clothes, his nakedness exposed to the mocking crowds. He absorbed the shame that was meant for Gomer, the shame that was meant for us.</p>
+                </div>
+                <span class="page-num">16</span>
+            </div>
+            <div class="page-side page-back bg-page" style="background-image: url('Images/17.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter XVII</span>
+                    <h2>The Scourging</h2>
+                    <div class="pigment-wash alt"></div>
+                    <p><span class="drop-cap">T</span>he law demanded punishment, and the punishment was brutal. Jesus was tied to a post and lashed thirty-nine times, the maximum penalty allowed.</p>
+                    <p>The whip was not a simple strap of leather; it was a scourge, tipped with bone and metal, designed to rip and tear. With each strike, flesh was pulled from his body. Blood oozed from countless wounds until his back was a shredded ruin and his rib cage was exposed. He hardly looked human.</p>
+                </div>
+                <span class="page-num">17</span>
+            </div>
+        </div>
+
+        <!-- PAGE 9 -->
+        <div class="page" id="page-9">
+            <div class="page-side page-front bg-page" style="background-image: url('Images/18.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter XVIII</span>
+                    <h2>The Journey to the Cross</h2>
+                    <p><span class="drop-cap">A</span>nd that was only the beginning. In this mangled state, a crossbeam weighing more than fifty kilograms was heaved onto his bleeding shoulders. He was forced to carry it for a kilometer through the city streets.</p>
+                    <p>The people he came to save now cursed him, spat on him, and tried to trip him, laughing when he fell. He endured it all for a sin he did not commit.</p>
+                </div>
+                <span class="page-num">18</span>
+            </div>
+            <div class="page-side page-back bg-page" style="background-image: url('Images/19.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter XIX</span>
+                    <h2>The Agony of the Cross</h2>
+                    <div class="pigment-wash"></div>
+                    <p><span class="drop-cap">T</span>he worst suffering was on the cross. Iron spikes were driven through the nerves in his hands and through his feet, pinning him to the wood.</p>
+                    <p>To breathe, he had to push his entire body upward, scraping his exposed ribs against the splintered timber. Every single breath was a fresh wave of blinding, searing pain. He hung there for hours, suspended between heaven and earth.</p>
+                </div>
+                <span class="page-num">19</span>
+            </div>
+        </div>
+
+        <!-- PAGE 10 -->
+        <div class="page" id="page-10">
+            <div class="page-side page-front bg-page" style="background-image: url('Images/20.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter XX</span>
+                    <h2>The Power of Choice</h2>
+                    <p><span class="drop-cap">Y</span>et, he was not powerless. He is the commander of the angel armies of the Lord. One word from his lips and twelve legions of angels would have descended to wipe the planet clean.</p>
+                    <p>But he remained silent. He chose the nails. He chose the pain. He chose to suffer, to endure it all in the name of love, until every last drop of his blood was shed to pay our debt and break the shackles of sin forever.</p>
+                </div>
+                <span class="page-num">20</span>
+            </div>
+            <div class="page-side page-back bg-page" style="background-image: url('Images/21.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Chapter XXI</span>
+                    <h2>Redeeming Love</h2>
+                    <div class="pigment-wash alt"></div>
+                    <p><span class="drop-cap">T</span>his is the love that bought us back. He brings us home, not as slaves, but as beloved children. He clothes us in righteousness and promises to be with us forever.</p>
+                    <p>His is a love that redeems, a love that restores, a love that sees the ruins of our lives and promises to build something beautiful. It is a love that never, ever fails.</p>
+                </div>
+                <span class="page-num">21</span>
+            </div>
+        </div>
+
+        <!-- PAGE 11 -->
+        <div class="page" id="page-11">
+            <div class="page-side page-front bg-page" style="background-image: url('Images/22.png');">
+                <div class="page-content">
+                    <span class="chapter-label">References</span>
+                    <h2>Biblical Sources</h2>
+                    <div class="references">
+                        <p>The story and theological parallels in this book are drawn from the following sources:</p>
+                        <ul>
+                            <li><strong>The Book of Hosea:</strong> Chapters 1, 2, and 3 detail the life of the prophet Hosea and his wife Gomer.</li>
+                            <li><strong>1 Corinthians 13:4-8a:</strong> The specific verses quoted detailing the nature of love.</li>
+                            <li><strong>The Gospel of Matthew:</strong> Accounts of the crucifixion (Matthew 26:53).</li>
+                            <li><strong>The Gospel of John:</strong> For details of the crucifixion, including the debt payment (John 19:30).</li>
+                            <li><strong>The Gospel of Luke and Mark:</strong> For accounts of the scourging and the journey to the cross.</li>
+                            <li><strong>Isaiah 53:5:</strong> References the scourging and Jesus's substitutionary suffering.</li>
+                        </ul>
+                    </div>
+                </div>
+                <span class="page-num">22</span>
+            </div>
+            <div class="page-side page-back bg-page" style="background-image: url('Images/23.png');">
+                <div class="page-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                    <p style="font-size: 1.1rem; margin-bottom: 1rem;">Created by</p>
+                    <h2 style="font-size: 2.2rem; margin-bottom: 2rem;">Samuel Kurian Roy</h2>
+                    <p style="font-style: italic; font-size: 1.3rem; margin-bottom: 2rem;">S.D.G.</p>
+                    <div class="divider" style="width: 60%;"></div>
+                    <p style="font-size: 0.9rem; margin-top: 1.5rem;">For inquiries: storybookssdg@gmail.com</p>
+                </div>
+                <span class="page-num">23</span>
+            </div>
+        </div>
+
+        <!-- PAGE 12 / BACK COVER -->
+        <div class="page" id="page-12">
+            <div class="page-side page-front bg-page" style="background-image: url('Images/24.png');">
+                <div class="page-content">
+                    <span class="chapter-label">Epilogue</span>
+                    <h2>The End</h2>
+                    <div class="pigment-wash"></div>
+                    <p><span class="drop-cap">T</span>hank you for reading this story of unfailing love. May it remind you of the depth of God's love for each of us, a love that pursues, redeems, and restores.</p>
+                    <div class="divider"></div>
+                    <div class="scripture">
+                        For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.
+                    </div>
+                    <p style="text-align: right; font-style: italic; font-size: 0.9rem;">— John 3:16</p>
+                </div>
+                <span class="page-num">24</span>
+            </div>
+            <div class="page-side page-back cover-front" style="background-color: var(--pigment-indigo); border-left: none; border-right: 15px solid rgba(0,0,0,0.2);">
+                <h1 style="font-size: 2.5rem;">Hosea & Gomer</h1>
+                <div class="subtitle">A Story of Unfailing Love</div>
+                <div class="author" style="margin-top: 3rem;">Created by Samuel Kurian Roy</div>
+                <p style="color: var(--pigment-ash); opacity: 0.5; font-size: 0.75rem; margin-top: 2rem;">S.D.G. — Soli Deo Gloria</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Page Navigation Menu -->
+    <div class="page-nav-menu">
+        <button class="jump-to-page-btn" onclick="togglePageMenu()" title="Jump to Page">
+            <i class="fas fa-list"></i> Pages
+        </button>
+        <select class="page-select" id="page-selector" onchange="jumpToPage()">
+            <option value="0">Cover</option>
+            <option value="1">Pages 1-2: The Prophet's Calling / Meeting Gomer</option>
+            <option value="2">Pages 3-4: A Quiet Harbor / First Betrayal</option>
+            <option value="3">Pages 5-6: Deepening Shame / Spectacle</option>
+            <option value="4">Pages 7-8: Years Passed / Second Command</option>
+            <option value="5">Pages 9-10: Redemption / Beginning of Healing</option>
+            <option value="6">Pages 11-12: Nature of Love / What Gomer Deserved</option>
+            <option value="7">Pages 13-14: Parallel to Christ / Humanity's Betrayal</option>
+            <option value="8">Pages 15-16: God's Pursuit / Ultimate Price</option>
+            <option value="9">Pages 17-18: The Scourging / Journey to Cross</option>
+            <option value="10">Pages 19-20: Agony of Cross / Power of Choice</option>
+            <option value="11">Pages 21-22: Redeeming Love / Biblical Sources</option>
+            <option value="12">Pages 23-24: Creator / Epilogue</option>
+        </select>
+    </div>
+
+    <!-- Audio Controls -->
+    <div class="audio-controls">
+        <button class="audio-btn" id="audio-btn" onclick="toggleAudio()" title="Play Audio">
+            <i class="fas fa-play" id="audio-icon"></i>
+        </button>
+        <button class="audio-btn" id="autoplay-btn" onclick="toggleAutoplay()" title="Autoplay Disabled">
+            <i class="fas fa-forward" id="autoplay-icon"></i>
+        </button>
+        <button class="audio-btn" id="mute-btn" onclick="toggleMute()" title="Mute All Audio">
+            <i class="fas fa-volume-up" id="mute-icon"></i>
+        </button>
+        <div class="volume-control">
+            <i class="fas fa-volume-up volume-icon" id="volume-icon"></i>
+            <input type="range" min="0" max="100" value="50" class="volume-slider" id="volume-slider">
+        </div>
+    </div>
+
+    <!-- Navigation Controls -->
+    <div class="controls">
+        <button onclick="prevPage()" id="prev-btn">Previous</button>
+        <div class="page-indicator" id="page-indicator">Page 0 of 12</div>
+        <button onclick="nextPage()" id="next-btn">Next</button>
+    </div>
+
+    <!-- Hidden Audio Elements -->
+    <audio id="page-audio" preload="metadata"></audio>
+    <audio id="background-music" src="Songs/background.mp3" loop preload="metadata"></audio>
+
+    <script>
+        const book = document.getElementById('book');
+        const pages = document.querySelectorAll('.page');
+        let currentPage = -1;
+        const totalPages = pages.length - 1;
+
+        // Audio variables
+        let audioElement = document.getElementById('page-audio');
+        let backgroundMusic = document.getElementById('background-music');
+        let isPlaying = false;
+        let isAutoplay = false;
+        let isMuted = false;
+        let previousVolume = 0.5;
+        let musicRestoreTimer = null;
+
+        // Page audio files mapping
+        const pageAudioFiles = {
+            0: 'Audio/page0.mp3',
+            1: 'Audio/page1-2.mp3',
+            2: 'Audio/page3-4.mp3',
+            3: 'Audio/page5-6.mp3',
+            4: 'Audio/page7-8.mp3',
+            5: 'Audio/page9-10.mp3',
+            6: 'Audio/page11-12.mp3',
+            7: 'Audio/page13-14.mp3',
+            8: 'Audio/page15-16.mp3',
+            9: 'Audio/page17-18.mp3',
+            10: 'Audio/page19-20.mp3',
+            11: 'Audio/page21-22.mp3',
+            12: 'Audio/page23-24.mp3'
+        };
+
+        function updateBookState() {
+            if (currentPage >= 0) {
+                book.classList.add('opened');
+            } else {
+                book.classList.remove('opened');
+            }
+
+            pages.forEach((page, index) => {
+                if (index <= currentPage) {
+                    // Flipped pages - on the left
+                    page.classList.add('flipped');
+                    // Most recently flipped page (currentPage) should be on top of other flipped pages
+                    page.style.zIndex = index;
+                } else {
+                    // Unflipped pages - on the right
+                    page.classList.remove('flipped');
+                    // First unflipped page should be on top
+                    page.style.zIndex = (totalPages * 2) - index;
+                }
+            });
+
+            // Update page indicator
+            document.getElementById('page-indicator').textContent = `Page ${currentPage + 1} of ${totalPages + 1}`;
+            
+            // Update buttons
+            document.getElementById('prev-btn').disabled = currentPage < 0;
+            document.getElementById('next-btn').disabled = currentPage >= totalPages;
+
+            // Load audio for current page
+            loadAudio(currentPage + 1);
+
+            // Start background music after leaving cover
+            if (currentPage >= 0 && backgroundMusic.paused) {
+                backgroundMusic.play().catch(() => {});
+            }
+        }
+
+        function loadAudio(pageIndex) {
+            const audioFile = pageAudioFiles[pageIndex];
+            if (audioFile) {
+                audioElement.src = audioFile;
+                audioElement.load();
+            } else {
+                audioElement.src = '';
+            }
+            isPlaying = false;
+            updateAudioButton();
+        }
+
+        function updateAudioButton() {
+            const audioBtn = document.getElementById('audio-btn');
+            const audioIcon = document.getElementById('audio-icon');
+            
+            if (!audioElement.src || audioElement.src.includes('undefined')) {
+                audioBtn.classList.add('disabled');
+                audioIcon.className = 'fas fa-volume-mute';
+                audioBtn.title = 'No Audio Available';
+            } else if (isPlaying) {
+                audioBtn.classList.add('active');
+                audioIcon.className = 'fas fa-pause';
+                audioBtn.classList.remove('disabled');
+                audioBtn.title = 'Pause Audio';
+            } else {
+                audioBtn.classList.remove('active');
+                audioIcon.className = 'fas fa-play';
+                audioBtn.classList.remove('disabled');
+                audioBtn.title = 'Play Audio';
+            }
+        }
+
+        function toggleAudio() {
+            if (!audioElement.src || audioElement.src.includes('undefined')) return;
+            
+            if (isPlaying) {
+                audioElement.pause();
+                isPlaying = false;
+                clearTimeout(musicRestoreTimer);
+                musicRestoreTimer = setTimeout(() => {
+                    backgroundMusic.volume = previousVolume;
+                }, 500);
+            } else {
+                audioElement.play().catch(err => console.log('Audio play failed:', err));
+                isPlaying = true;
+                backgroundMusic.volume = previousVolume * 0.3;
+            }
+            updateAudioButton();
+        }
+
+        function toggleAutoplay() {
+            isAutoplay = !isAutoplay;
+            const autoplayBtn = document.getElementById('autoplay-btn');
+            const autoplayIcon = document.getElementById('autoplay-icon');
+            
+            if (isAutoplay) {
+                autoplayIcon.style.textDecoration = 'none';
+                autoplayBtn.classList.remove('disabled');
+                autoplayBtn.title = 'Autoplay Enabled';
+            } else {
+                autoplayIcon.style.textDecoration = 'line-through';
+                autoplayBtn.classList.add('disabled');
+                autoplayBtn.title = 'Autoplay Disabled';
+            }
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const volumeSlider = document.getElementById('volume-slider');
+            const volumeIcon = document.getElementById('volume-icon');
+            const muteBtn = document.getElementById('mute-btn'); const muteIcon = document.getElementById('mute-icon');
+            
+            if (isMuted) {
+                previousVolume = backgroundMusic.volume;
+                backgroundMusic.volume = 0;
+                audioElement.volume = 0;
+                volumeSlider.value = 0;
+                volumeIcon.className = 'fas fa-volume-mute volume-icon';
+                muteIcon.className = 'fas fa-volume-mute';
+                muteBtn.classList.add('muted');
+                muteBtn.title = 'Unmute All Audio';
+            } else {
+                backgroundMusic.volume = previousVolume;
+                audioElement.volume = 1;
+                volumeSlider.value = previousVolume * 100;
+                muteIcon.className = 'fas fa-volume-up';
+                muteBtn.classList.remove('muted');
+                muteBtn.title = 'Mute All Audio';
+                if (previousVolume < 0.5) {
+                    volumeIcon.className = 'fas fa-volume-down volume-icon';
+                } else {
+                    volumeIcon.className = 'fas fa-volume-up volume-icon';
+                }
+            }
+        }
+
+        document.getElementById('volume-slider').addEventListener('input', function() {
+            const volume = this.value / 100;
+            backgroundMusic.volume = volume;
+            previousVolume = volume;
+            const volumeIcon = document.getElementById('volume-icon');
+            if (volume === 0) {
+                volumeIcon.className = 'fas fa-volume-mute volume-icon';
+            } else if (volume < 0.5) {
+                volumeIcon.className = 'fas fa-volume-down volume-icon';
+            } else {
+                volumeIcon.className = 'fas fa-volume-up volume-icon';
+            }
+            if (volume > 0 && isMuted) {
+                isMuted = false;
+                document.getElementById('mute-btn').classList.remove('muted');
+                document.getElementById('mute-icon').className = 'fas fa-volume-up';
+            }
+        });
+
+        backgroundMusic.volume = 0.5;
+
+        audioElement.addEventListener('ended', () => {
+            isPlaying = false;
+            updateAudioButton();
+            if (musicRestoreTimer) clearTimeout(musicRestoreTimer);
+            if (isAutoplay && currentPage < totalPages) {
+                setTimeout(() => {
+                    nextPage();
+                }, 500);
+            }
+        });
+
+        function nextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateBookState();
+                if (isPlaying) {
+                    audioElement.pause();
+                    isPlaying = false;
+                }
+            }
+        }
+
+        function prevPage() {
+            if (currentPage >= 0) {
+                currentPage--;
+                updateBookState();
+                if (isPlaying) {
+                    audioElement.pause();
+                    isPlaying = false;
+                }
+            }
+        }
+
+        function togglePageMenu() {
+            const pageSelector = document.getElementById('page-selector');
+            pageSelector.classList.toggle('show');
+        }
+
+        function jumpToPage() {
+            const pageSelector = document.getElementById('page-selector');
+            const selectedPage = parseInt(pageSelector.value);
+            const targetPage = selectedPage - 1;
+            
+            if (targetPage >= -1 && targetPage <= totalPages) {
+                currentPage = targetPage;
+                updateBookState();
+                if (isPlaying) {
+                    audioElement.pause();
+                    isPlaying = false;
+                }
+            }
+            
+            pageSelector.classList.remove('show');
+        }
+
+        // Close page menu when clicking outside
+        document.addEventListener('click', function(e) {
+            const pageMenu = document.querySelector('.page-nav-menu');
+            const pageSelector = document.getElementById('page-selector');
+            if (!pageMenu.contains(e.target) && pageSelector.classList.contains('show')) {
+                pageSelector.classList.remove('show');
+            }
+        });
+
+        // Click on page to turn
+        pages.forEach((page, index) => {
+            page.addEventListener('click', (e) => {
+                if (index === currentPage + 1) {
+                    nextPage();
+                } else if (index === currentPage) {
+                    prevPage();
+                }
+                e.stopPropagation();
+            });
+        });
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "ArrowRight") nextPage();
+            if (e.key === "ArrowLeft") prevPage();
+        });
+
+        // Touch support for mobile
+        let touchStartX = 0;
+        document.addEventListener('touchstart', e => touchStartX = e.touches[0].clientX);
+        document.addEventListener('touchend', e => {
+            const touchEndX = e.changedTouches[0].clientX;
+            if (touchStartX - touchEndX > 50) nextPage();
+            if (touchEndX - touchStartX > 50) prevPage();
+        });
+
+        // Initialize
+        updateBookState();
+
+    </script>
+</body>
+</html>
