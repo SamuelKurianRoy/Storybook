@@ -109,8 +109,6 @@
             height: 100%;
             top: 0;
             left: 0;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
             padding: 2.5rem 2rem;
             display: flex;
             flex-direction: column;
@@ -143,6 +141,12 @@
             background: var(--pigment-ash);
             background-image: url("https://www.transparenttextures.com/patterns/linen-paper.png");
         }
+        
+        /* Hide front when page is flipped */
+        .page.flipped .page-front {
+            opacity: 0;
+            pointer-events: none;
+        }
 
         .page-back {
             transform: rotateY(180deg);
@@ -152,6 +156,17 @@
             top: 0;
             left: 0;
             direction: rtl;
+        }
+        
+        /* Hide back when page is not flipped */
+        .page:not(.flipped) .page-back {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        /* Show back when page is flipped */
+        .page.flipped .page-back {
+            opacity: 1;
         }
         
         .page-back .page-content,
@@ -1009,14 +1024,14 @@
 
             pages.forEach((page, index) => {
                 if (index <= currentPage) {
-                    // Flipped pages - on the left
+                    // Flipped pages - showing their backs
                     page.classList.add('flipped');
-                    // Most recently flipped page (currentPage) should be on top of other flipped pages
+                    // Most recently flipped page should be on top
                     page.style.zIndex = index;
                 } else {
-                    // Unflipped pages - on the right
+                    // Unflipped pages - showing their fronts
                     page.classList.remove('flipped');
-                    // First unflipped page should be on top
+                    //First unflipped page should be on top
                     page.style.zIndex = (totalPages * 2) - index;
                 }
             });
