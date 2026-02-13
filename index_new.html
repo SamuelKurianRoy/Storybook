@@ -65,7 +65,7 @@
 
         /* The Book Container */
         .book {
-            width: var(--page-width);
+            width: calc(var(--page-width) * 2);
             height: var(--page-height);
             position: relative;
             transform-style: preserve-3d;
@@ -74,7 +74,7 @@
         }
 
         .book.opened {
-            transform: translateX(25%) rotateY(-10deg);
+            transform: rotateY(-5deg);
         }
 
         @media (max-width: 900px) {
@@ -86,21 +86,27 @@
         /* Page Mechanics */
         .page {
             position: absolute;
-            width: 100%;
+            width: 50%;
             height: 100%;
             top: 0;
-            left: 0;
+            right: 0;
             transform-origin: left center;
             transform-style: preserve-3d;
             transition: transform var(--transition-speed) var(--ease-out-expo);
-            background: var(--pigment-ash);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             pointer-events: auto;
-            overflow: hidden;
         }
         
         .page.flipped {
+            transform: rotateY(-180deg);
             pointer-events: none;
+        }
+        
+        .page.flipped .page-front {
+            opacity: 0;
+        }
+        
+        .page.flipped .page-back {
+            opacity: 1;
         }
 
         .page-side {
@@ -115,6 +121,8 @@
             overflow-y: auto;
             overflow-x: hidden;
             border: 1px solid rgba(0,0,0,0.05);
+            pointer-events: auto;
+            backface-visibility: hidden;
         }
 
         /* Custom scrollbar */
@@ -140,19 +148,7 @@
             z-index: 2;
             background: var(--pigment-ash);
             background-image: url("https://www.transparenttextures.com/patterns/linen-paper.png");
-        }
-        
-        /* Show front when page is not flipped */
-        .page:not(.flipped) .page-front {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        /* Hide front when page is flipped */
-        .page.flipped .page-front {
-            opacity: 0;
-            pointer-events: none;
-            visibility: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .page-back {
@@ -160,21 +156,18 @@
             background: var(--pigment-ash);
             background-image: url("https://www.transparenttextures.com/patterns/linen-paper.png");
             z-index: 1;
-            top: 0;
-            left: 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         
         /* Hide back when page is not flipped */
         .page:not(.flipped) .page-back {
             opacity: 0;
             pointer-events: none;
-            visibility: hidden;
         }
         
         /* Show back when page is flipped */
         .page.flipped .page-back {
             opacity: 1;
-            visibility: visible;
         }
 
         /* Cover Specifics */
@@ -526,6 +519,19 @@
         @media (max-width: 900px) {
             .book {
                 transform-origin: center;
+                width: var(--page-width);
+            }
+
+            .page-side {
+                width: 100%;
+            }
+
+            .page-front {
+                right: 0;
+            }
+
+            .page-back {
+                left: 0;
             }
 
             .audio-controls {
@@ -1021,13 +1027,13 @@
                 if (index <= currentPage) {
                     // Flipped pages - showing their backs
                     page.classList.add('flipped');
-                    // Most recently flipped page should be on top
-                    page.style.zIndex = index;
+                    // Most recently flipped page should be on top of other flipped pages
+                    page.style.zIndex = 10 + index;
                 } else {
                     // Unflipped pages - showing their fronts
                     page.classList.remove('flipped');
                     //First unflipped page should be on top
-                    page.style.zIndex = (totalPages * 2) - index;
+                    page.style.zIndex = 10 + (totalPages * 2) - index;
                 }
             });
 
