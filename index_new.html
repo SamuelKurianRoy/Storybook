@@ -71,6 +71,7 @@
             transform-style: preserve-3d;
             transition: transform 1.2s var(--ease-out-expo);
             cursor: pointer;
+            overflow: visible;
         }
 
         .book.opened {
@@ -94,6 +95,7 @@
             transform-style: preserve-3d;
             transition: transform var(--transition-speed) var(--ease-out-expo);
             pointer-events: auto;
+            overflow: hidden;
         }
         
         .page.flipped {
@@ -103,10 +105,21 @@
         
         .page.flipped .page-front {
             opacity: 0;
+            visibility: hidden;
         }
         
-        .page.flipped .page-back {
+        /* Note: Visibility of flipped page backs is controlled by JavaScript */
+        
+        /* Hide all page backs by default */
+        .page:not(.flipped) .page-back {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        /* Show all page fronts by default */
+        .page:not(.flipped) .page-front {
             opacity: 1;
+            visibility: visible;
         }
 
         .page-side {
@@ -116,13 +129,11 @@
             top: 0;
             left: 0;
             padding: 2.5rem 2rem;
-            display: flex;
-            flex-direction: column;
+            display: block;
             overflow-y: auto;
             overflow-x: hidden;
             border: 1px solid rgba(0,0,0,0.05);
             pointer-events: auto;
-            backface-visibility: hidden;
         }
 
         /* Custom scrollbar */
@@ -149,6 +160,7 @@
             background: var(--pigment-ash);
             background-image: url("https://www.transparenttextures.com/patterns/linen-paper.png");
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            backface-visibility: hidden;
         }
 
         .page-back {
@@ -162,13 +174,11 @@
         /* Hide back when page is not flipped */
         .page:not(.flipped) .page-back {
             opacity: 0;
+            visibility: hidden;
             pointer-events: none;
         }
         
-        /* Show back when page is flipped */
-        .page.flipped .page-back {
-            opacity: 1;
-        }
+        /* Note: Visibility of flipped page backs is controlled by JavaScript */
 
         /* Cover Specifics */
         .cover-front {
@@ -283,7 +293,7 @@
             float: left;
             font-size: 3.5rem;
             line-height: 0.9;
-            padding-right: 0. 5rem;
+            padding-right: 0.5rem;
             padding-top: 0.15rem;
             font-weight: 800;
             color: var(--pigment-clay);
@@ -1017,6 +1027,10 @@
         };
 
         function updateBookState() {
+            // DEBUG LOGGING - Phase 1
+            console.log('='.repeat(80));
+            console.log('[DEBUG] updateBookState called, currentPage:', currentPage);
+            
             if (currentPage >= 0) {
                 book.classList.add('opened');
             } else {
@@ -1024,16 +1038,89 @@
             }
 
             pages.forEach((page, index) => {
+                const pageBack = page.querySelector('.page-back');
+                const pageFront = page.querySelector('.page-front');
+                
                 if (index <= currentPage) {
                     // Flipped pages - showing their backs
                     page.classList.add('flipped');
-                    // Most recently flipped page should be on top of other flipped pages
                     page.style.zIndex = 10 + index;
+                    
+                    // DEBUG LOGGING
+                    console.log(`[DEBUG] Page ${index}: FLIPPED, z-index=${10 + index}`);
+                    
+                    // Hide the front
+                    if (pageFront) {
+                        pageFront.style.opacity = '0';
+                        pageFront.style.visibility = 'hidden';
+                        pageFront.style.pointerEvents = 'none';
+                    }
+                    
+                    // Only show the back of the current page (top of the left stack)
+                    if (pageBack) {
+                        if (index === currentPage) {
+                            pageBack.style.opacity = '1';
+                            pageBack.style.visibility = 'visible';
+                            pageBack.style.display = 'block';
+                            pageBack.style.pointerEvents = 'auto';
+                            pageBack.style.zIndex = '999';
+                            
+                            // DEBUG LOGGING with computed styles
+                            console.log(`[DEBUG] Page ${index} BACK: SET TO VISIBLE (current page)`);
+                            setTimeout(() => {
+                                const computed = window.getComputedStyle(pageBack);
+                                console.log(`[DEBUG COMPUTED] Page ${index} back:`, {
+                                    opacity: computed.opacity,
+                                    visibility: computed.visibility,
+                                    display: computed.display,
+                                    zIndex: computed.zIndex,
+                                    transform: computed.transform,
+                                    backfaceVisibility: computed.backfaceVisibility
+                                });
+                            }, 100);
+                            
+                            // DEBUG VISUAL - Add border and background to current page back
+                            pageBack.style.border = '5px solid red';
+                            pageBack.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
+                        } else {
+                            pageBack.style.opacity = '0';
+                            pageBack.style.visibility = 'hidden';
+                            pageBack.style.display = 'none';
+                            pageBack.style.pointerEvents = 'none';
+                            pageBack.style.zIndex = '';
+                            
+                            // DEBUG VISUAL - Remove debug styling
+                            pageBack.style.border = '';
+                            pageBack.style.backgroundColor = '';
+                        }
+                    }
                 } else {
                     // Unflipped pages - showing their fronts
                     page.classList.remove('flipped');
-                    //First unflipped page should be on top
                     page.style.zIndex = 10 + (totalPages * 2) - index;
+                    
+                    // DEBUG LOGGING
+                    console.log(`[DEBUG] Page ${index}: UNFLIPPED, z-index=${10 + (totalPages * 2) - index}`);
+                    
+                    // Show the front
+                    if (pageFront) {
+                        pageFront.style.opacity = '';
+                        pageFront.style.visibility = '';
+                        pageFront.style.pointerEvents = '';
+                    }
+                    
+                    // Hide the back
+                    if (pageBack) {
+                        pageBack.style.opacity = '';
+                        pageBack.style.visibility = '';
+                        pageBack.style.display = '';
+                        pageBack.style.pointerEvents = '';
+                        pageBack.style.zIndex = '';
+                        
+                        // DEBUG VISUAL - Remove debug styling
+                        pageBack.style.border = '';
+                        pageBack.style.backgroundColor = '';
+                    }
                 }
             });
 
@@ -1051,6 +1138,8 @@
             if (currentPage >= 0 && backgroundMusic.paused) {
                 backgroundMusic.play().catch(() => {});
             }
+            
+            console.log('='.repeat(80));
         }
 
         function loadAudio(pageIndex) {
