@@ -989,8 +989,8 @@
     </div>
 
     <!-- Hidden Audio Elements -->
-    <audio id="page-audio" preload="metadata"></audio>
-    <audio id="background-music" src="Songs/background.mp3" loop preload="metadata"></audio>
+    <audio id="page-audio" preload="none"></audio>
+    <audio id="background-music" preload="none" loop></audio>
 
     <script>
         const book = document.getElementById('book');
@@ -1006,23 +1006,133 @@
         let isMuted = false;
         let previousVolume = 0.5;
         let musicRestoreTimer = null;
+        let fadeInterval = null;
+        let audioQueue = [];
 
-        // Page audio files mapping
-        const pageAudioFiles = {
-            0: 'Audio/page0.mp3',
-            1: 'Audio/page1-2.mp3',
-            2: 'Audio/page3-4.mp3',
-            3: 'Audio/page5-6.mp3',
-            4: 'Audio/page7-8.mp3',
-            5: 'Audio/page9-10.mp3',
-            6: 'Audio/page11-12.mp3',
-            7: 'Audio/page13-14.mp3',
-            8: 'Audio/page15-16.mp3',
-            9: 'Audio/page17-18.mp3',
-            10: 'Audio/page19-20.mp3',
-            11: 'Audio/page21-22.mp3',
-            12: 'Audio/page23-24.mp3'
-        };
+        // Pages that have narration audio files (Audio/1.mp3 through Audio/21.mp3, and Audio/24.mp3)
+        const pagesWithAudio = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,24];
+
+        // Get the two visible page numbers for a given currentPage value
+        // currentPage N (N >= 0): left page = N*2+1, right page = N*2+2
+        function getVisiblePages(cp) {
+            if (cp < 0) return [];
+            if (cp >= totalPages) return []; // back cover
+            const left = cp * 2 + 1;
+            const right = cp * 2 + 2;
+            return [left, right];
+        }
+
+        // Get background music song for a given page number
+        function getSongForPage(pageNum) {
+            if (pageNum >= 0 && pageNum <= 3) return 'Songs/Part_1.mp3';
+            if (pageNum >= 4 && pageNum <= 8) return 'Songs/Part_2.mp3';
+            if (pageNum >= 9 && pageNum <= 11) return 'Songs/Part_3.mp3';
+            if (pageNum >= 12 && pageNum <= 14) return 'Songs/Part_4.mp3';
+            if (pageNum >= 15 && pageNum <= 17) return 'Songs/Part_5.mp3';
+            if (pageNum >= 18 && pageNum <= 24) return 'Songs/Part_6.mp3';
+            return '';
+        }
+
+        function fadeOutMusic(callback) {
+            const currentVol = backgroundMusic.volume;
+            if (currentVol <= 0.01) {
+                backgroundMusic.volume = 0;
+                if (callback) callback();
+                return;
+            }
+            let vol = currentVol;
+            clearInterval(fadeInterval);
+            fadeInterval = setInterval(() => {
+                vol -= 0.05;
+                if (vol <= 0) {
+                    backgroundMusic.volume = 0;
+                    clearInterval(fadeInterval);
+                    if (callback) callback();
+                } else {
+                    backgroundMusic.volume = vol;
+                }
+            }, 50);
+        }
+
+        function fadeInMusic(targetOverride) {
+            const sliderVal = parseInt(document.getElementById('volume-slider').value);
+            const target = targetOverride !== undefined ? targetOverride : (isMuted ? 0 : sliderVal / 100);
+            if (target === 0) { backgroundMusic.volume = 0; return; }
+            backgroundMusic.volume = 0;
+            let vol = 0;
+            clearInterval(fadeInterval);
+            fadeInterval = setInterval(() => {
+                vol += 0.05;
+                if (vol >= target) {
+                    backgroundMusic.volume = target;
+                    clearInterval(fadeInterval);
+                } else {
+                    backgroundMusic.volume = vol;
+                }
+            }, 50);
+        }
+
+        function duckBackgroundMusic() {
+            if (backgroundMusic.paused || isMuted) return;
+            const target = backgroundMusic.volume * 0.15;
+            let vol = backgroundMusic.volume;
+            clearInterval(fadeInterval);
+            fadeInterval = setInterval(() => {
+                vol -= 0.03;
+                if (vol <= target) {
+                    backgroundMusic.volume = target;
+                    clearInterval(fadeInterval);
+                } else {
+                    backgroundMusic.volume = vol;
+                }
+            }, 50);
+        }
+
+        function restoreBackgroundMusic() {
+            if (backgroundMusic.paused || isMuted) return;
+            const sliderVal = parseInt(document.getElementById('volume-slider').value);
+            const target = sliderVal / 100;
+            let vol = backgroundMusic.volume;
+            clearInterval(fadeInterval);
+            fadeInterval = setInterval(() => {
+                vol += 0.03;
+                if (vol >= target) {
+                    backgroundMusic.volume = target;
+                    clearInterval(fadeInterval);
+                } else {
+                    backgroundMusic.volume = vol;
+                }
+            }, 50);
+        }
+
+        function handleBackgroundMusic(cp) {
+            const visiblePages = getVisiblePages(cp);
+            const firstPage = visiblePages[0] || 0;
+            const songToPlay = getSongForPage(firstPage);
+
+            const currentSong = backgroundMusic.src ? backgroundMusic.src.split('/').pop().split('?')[0] : '';
+            const newSong = songToPlay ? songToPlay.split('/').pop() : '';
+
+            if (songToPlay && currentSong !== newSong) {
+                if (musicRestoreTimer) { clearTimeout(musicRestoreTimer); musicRestoreTimer = null; }
+                backgroundMusic.pause();
+                backgroundMusic.src = songToPlay;
+                backgroundMusic.currentTime = 0;
+                backgroundMusic.volume = 0;
+                backgroundMusic.play().then(() => {
+                    if (isPlaying) {
+                        const sliderVal = parseInt(document.getElementById('volume-slider').value);
+                        fadeInMusic((sliderVal / 100) * 0.15);
+                    } else {
+                        fadeInMusic();
+                    }
+                }).catch(() => {});
+            } else if (songToPlay && backgroundMusic.paused) {
+                backgroundMusic.play().then(() => { fadeInMusic(); }).catch(() => {});
+            } else if (!songToPlay) {
+                fadeOutMusic(() => { backgroundMusic.pause(); backgroundMusic.currentTime = 0; });
+            }
+        }
 
         function updateBookState() {
             if (currentPage >= 0) {
@@ -1090,24 +1200,47 @@
             document.getElementById('prev-btn').disabled = currentPage < 0;
             document.getElementById('next-btn').disabled = currentPage >= totalPages;
 
-            // Load audio for current page
-            loadAudio(currentPage + 1);
+            // Load narration audio for current spread
+            loadAudio(currentPage);
 
-            // Start background music after leaving cover
-            if (currentPage >= 0 && backgroundMusic.paused) {
-                backgroundMusic.play().catch(() => {});
-            }
+            // Handle background music
+            handleBackgroundMusic(currentPage);
         }
 
-        function loadAudio(pageIndex) {
-            const audioFile = pageAudioFiles[pageIndex];
-            if (audioFile) {
-                audioElement.src = audioFile;
-                audioElement.load();
+        function loadAudio(cp) {
+            // Stop any current playback
+            audioElement.pause();
+            audioElement.currentTime = 0;
+            audioQueue = [];
+            isPlaying = false;
+            if (musicRestoreTimer) { clearTimeout(musicRestoreTimer); musicRestoreTimer = null; }
+
+            const visiblePages = getVisiblePages(cp);
+            // Build queue of audio files for visible pages
+            visiblePages.forEach(p => {
+                if (pagesWithAudio.includes(p)) {
+                    audioQueue.push(`Audio/${p}.mp3`);
+                }
+            });
+
+            if (audioQueue.length > 0) {
+                audioElement.src = audioQueue[0];
+                document.getElementById('audio-btn').disabled = false;
+
+                if (isAutoplay) {
+                    audioElement.play().then(() => {
+                        isPlaying = true;
+                        duckBackgroundMusic();
+                        updateAudioButton();
+                    }).catch(() => {
+                        isPlaying = false;
+                        updateAudioButton();
+                    });
+                }
             } else {
                 audioElement.src = '';
+                document.getElementById('audio-btn').disabled = true;
             }
-            isPlaying = false;
             updateAudioButton();
         }
 
@@ -1138,14 +1271,17 @@
             if (isPlaying) {
                 audioElement.pause();
                 isPlaying = false;
-                clearTimeout(musicRestoreTimer);
-                musicRestoreTimer = setTimeout(() => {
-                    backgroundMusic.volume = previousVolume;
-                }, 500);
+                if (musicRestoreTimer) clearTimeout(musicRestoreTimer);
+                restoreBackgroundMusic();
             } else {
-                audioElement.play().catch(err => console.log('Audio play failed:', err));
-                isPlaying = true;
-                backgroundMusic.volume = previousVolume * 0.3;
+                audioElement.play().then(() => {
+                    isPlaying = true;
+                    duckBackgroundMusic();
+                    updateAudioButton();
+                }).catch(() => {
+                    isPlaying = false;
+                    updateAudioButton();
+                });
             }
             updateAudioButton();
         }
@@ -1218,35 +1354,60 @@
         backgroundMusic.volume = 0.5;
 
         audioElement.addEventListener('ended', () => {
-            isPlaying = false;
-            updateAudioButton();
-            if (musicRestoreTimer) clearTimeout(musicRestoreTimer);
-            if (isAutoplay && currentPage < totalPages) {
-                setTimeout(() => {
-                    nextPage();
-                }, 500);
+            // Remove the just-played file from the queue
+            if (audioQueue.length > 0) audioQueue.shift();
+
+            if (audioQueue.length > 0) {
+                // Play next audio in queue (right page narration)
+                audioElement.src = audioQueue[0];
+                audioElement.play().then(() => {
+                    isPlaying = true;
+                    updateAudioButton();
+                }).catch(() => {
+                    isPlaying = false;
+                    updateAudioButton();
+                });
+            } else {
+                // All narration for this spread finished
+                isPlaying = false;
+                updateAudioButton();
+                if (musicRestoreTimer) clearTimeout(musicRestoreTimer);
+                restoreBackgroundMusic();
+
+                // Auto-advance to next page after narration ends
+                if (isAutoplay && currentPage < totalPages) {
+                    setTimeout(() => {
+                        nextPage();
+                    }, 500);
+                }
             }
         });
 
         function nextPage() {
             if (currentPage < totalPages) {
+                // Stop current narration
+                audioElement.pause();
+                audioElement.currentTime = 0;
+                audioQueue = [];
+                isPlaying = false;
+                
                 currentPage++;
+                handleBackgroundMusic(currentPage);
                 updateBookState();
-                if (isPlaying) {
-                    audioElement.pause();
-                    isPlaying = false;
-                }
             }
         }
 
         function prevPage() {
             if (currentPage >= 0) {
+                // Stop current narration
+                audioElement.pause();
+                audioElement.currentTime = 0;
+                audioQueue = [];
+                isPlaying = false;
+                
                 currentPage--;
+                handleBackgroundMusic(currentPage);
                 updateBookState();
-                if (isPlaying) {
-                    audioElement.pause();
-                    isPlaying = false;
-                }
             }
         }
 
@@ -1261,12 +1422,14 @@
             const targetPage = selectedPage - 1;
             
             if (targetPage >= -1 && targetPage <= totalPages) {
+                audioElement.pause();
+                audioElement.currentTime = 0;
+                audioQueue = [];
+                isPlaying = false;
+                
                 currentPage = targetPage;
+                handleBackgroundMusic(currentPage);
                 updateBookState();
-                if (isPlaying) {
-                    audioElement.pause();
-                    isPlaying = false;
-                }
             }
             
             pageSelector.classList.remove('show');
