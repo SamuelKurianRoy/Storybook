@@ -95,7 +95,6 @@
             transform-style: preserve-3d;
             transition: transform var(--transition-speed) var(--ease-out-expo);
             pointer-events: auto;
-            overflow: hidden;
         }
         
         .page.flipped {
@@ -232,7 +231,6 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            position: relative;
         }
 
         .bg-page::before {
@@ -1027,10 +1025,6 @@
         };
 
         function updateBookState() {
-            // DEBUG LOGGING - Phase 1
-            console.log('='.repeat(80));
-            console.log('[DEBUG] updateBookState called, currentPage:', currentPage);
-            
             if (currentPage >= 0) {
                 book.classList.add('opened');
             } else {
@@ -1046,9 +1040,6 @@
                     page.classList.add('flipped');
                     page.style.zIndex = 10 + index;
                     
-                    // DEBUG LOGGING
-                    console.log(`[DEBUG] Page ${index}: FLIPPED, z-index=${10 + index}`);
-                    
                     // Hide the front
                     if (pageFront) {
                         pageFront.style.opacity = '0';
@@ -1063,44 +1054,17 @@
                             pageBack.style.visibility = 'visible';
                             pageBack.style.display = 'block';
                             pageBack.style.pointerEvents = 'auto';
-                            pageBack.style.zIndex = '999';
-                            
-                            // DEBUG LOGGING with computed styles
-                            console.log(`[DEBUG] Page ${index} BACK: SET TO VISIBLE (current page)`);
-                            setTimeout(() => {
-                                const computed = window.getComputedStyle(pageBack);
-                                console.log(`[DEBUG COMPUTED] Page ${index} back:`, {
-                                    opacity: computed.opacity,
-                                    visibility: computed.visibility,
-                                    display: computed.display,
-                                    zIndex: computed.zIndex,
-                                    transform: computed.transform,
-                                    backfaceVisibility: computed.backfaceVisibility
-                                });
-                            }, 100);
-                            
-                            // DEBUG VISUAL - Add border and background to current page back
-                            pageBack.style.border = '5px solid red';
-                            pageBack.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
                         } else {
                             pageBack.style.opacity = '0';
                             pageBack.style.visibility = 'hidden';
                             pageBack.style.display = 'none';
                             pageBack.style.pointerEvents = 'none';
-                            pageBack.style.zIndex = '';
-                            
-                            // DEBUG VISUAL - Remove debug styling
-                            pageBack.style.border = '';
-                            pageBack.style.backgroundColor = '';
                         }
                     }
                 } else {
                     // Unflipped pages - showing their fronts
                     page.classList.remove('flipped');
                     page.style.zIndex = 10 + (totalPages * 2) - index;
-                    
-                    // DEBUG LOGGING
-                    console.log(`[DEBUG] Page ${index}: UNFLIPPED, z-index=${10 + (totalPages * 2) - index}`);
                     
                     // Show the front
                     if (pageFront) {
@@ -1115,11 +1079,6 @@
                         pageBack.style.visibility = '';
                         pageBack.style.display = '';
                         pageBack.style.pointerEvents = '';
-                        pageBack.style.zIndex = '';
-                        
-                        // DEBUG VISUAL - Remove debug styling
-                        pageBack.style.border = '';
-                        pageBack.style.backgroundColor = '';
                     }
                 }
             });
@@ -1138,8 +1097,6 @@
             if (currentPage >= 0 && backgroundMusic.paused) {
                 backgroundMusic.play().catch(() => {});
             }
-            
-            console.log('='.repeat(80));
         }
 
         function loadAudio(pageIndex) {
