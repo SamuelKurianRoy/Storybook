@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="author" content="Samuel Kurian Roy">
+<meta name="description" content="A digital storybook written by Samuel Kurian Roy.">
+<title>Hosea and Gomer - A Story of Unfailing Love</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@300;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{--ochre:#c48c46;--clay:#8e4a31;--indigo:#2c364c;--ash:#e8e4db;--charcoal:#1a1817;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+html,body{height:100%;overflow:hidden;font-family:'Crimson Text',serif;background:var(--charcoal);}
+body{touch-action:pan-y;position:relative;}
+
+/* Cover */
+.cover-screen{position:fixed;top:0;left:0;width:100%;height:100%;z-index:100;
+  background-image:url('Cover.png');background-size:cover;background-position:center;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  color:var(--ash);padding:2rem;transition:opacity 0.6s,transform 0.6s;}
+.cover-screen.hidden{opacity:0;pointer-events:none;transform:scale(1.05);}
+.cover-screen .sub{font-family:'JetBrains Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:4px;opacity:0.7;margin-bottom:0.5rem;}
+.cover-screen h1{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:700;line-height:1.1;text-transform:uppercase;letter-spacing:-1px;margin-bottom:0.5rem;}
+.cover-screen .subtitle{font-size:1.1rem;opacity:0.9;margin-bottom:1.5rem;}
+.cover-screen .author{font-size:0.85rem;opacity:0.6;margin-bottom:2rem;}
+.cover-screen .start-btn{background:transparent;border:1px solid var(--ochre);color:var(--ochre);padding:1rem 2.5rem;
+  font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:3px;font-size:0.7rem;
+  cursor:pointer;transition:all 0.3s;animation:pulse 2s infinite;}
+.cover-screen .start-btn:hover,.cover-screen .start-btn:active{background:var(--ochre);color:var(--charcoal);}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(196,140,70,0.4)}50%{box-shadow:0 0 0 12px rgba(196,140,70,0)}}
+
+/* Flipbook Container */
+.flipbook{position:fixed;top:0;left:0;width:100%;height:100%;overflow:hidden;}
+.card{position:absolute;top:0;left:0;width:100%;height:100%;
+  transition:transform 0.5s cubic-bezier(0.19,1,0.22,1),opacity 0.5s;will-change:transform,opacity;}
+.card-bg{position:absolute;top:0;left:0;width:100%;height:100%;background-size:cover;background-position:center;}
+.card-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);}
+.card-content{position:relative;z-index:1;padding:4.5rem 1.5rem 5rem;height:100%;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;color:#f5f5f5;}
+.card-content::-webkit-scrollbar{width:4px;}
+.card-content::-webkit-scrollbar-track{background:rgba(255,255,255,0.1);}
+.card-content::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.3);border-radius:2px;}
+
+.chapter-label{font-family:'JetBrains Mono',monospace;font-size:0.6rem;text-transform:uppercase;
+  color:#ffd54f;display:block;margin-bottom:1rem;border-bottom:1px solid rgba(255,213,79,0.5);
+  padding-bottom:0.5rem;width:fit-content;letter-spacing:2px;}
+h2{font-family:'Playfair Display',serif;font-size:1.6rem;color:#fff;font-weight:700;
+  margin-bottom:1rem;line-height:1.2;text-shadow:2px 2px 4px rgba(0,0,0,0.8);}
+.text-body p,.text-body{font-size:0.95rem;line-height:1.75;color:#f0f0f0;font-weight:600;
+  text-shadow:1px 1px 2px rgba(0,0,0,0.8);text-align:justify;}
+.drop-cap{float:left;font-size:3rem;line-height:0.85;padding-right:0.4rem;padding-top:0.1rem;
+  font-weight:800;color:#ffd54f;font-family:'Playfair Display',serif;}
+.page-num{position:absolute;bottom:1.2rem;right:1.5rem;font-family:'JetBrains Mono',monospace;
+  font-size:0.65rem;color:rgba(255,255,255,0.5);z-index:2;}
+.scripture{font-style:italic;padding:1rem;background:rgba(255,255,255,0.12);
+  border-left:3px solid #ffd54f;margin:1rem 0;font-size:0.92rem;color:#f5f5f5;font-weight:600;}
+.divider{height:2px;background:linear-gradient(to right,transparent,var(--ochre),transparent);margin:1.2rem 0;}
+.references ul{list-style:none;padding-left:0.5rem;}
+.references li{margin-bottom:0.6rem;line-height:1.5;font-size:0.9rem;}
+.references strong{color:#ffd54f;}
+
+/* Top bar */
+.top-bar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;
+  align-items:center;padding:0.8rem 1rem;background:linear-gradient(to bottom,rgba(0,0,0,0.7),transparent);
+  pointer-events:none;}
+.top-bar>*{pointer-events:auto;}
+.back-link{color:var(--ochre);font-size:0.7rem;font-family:'JetBrains Mono',monospace;
+  text-decoration:none;text-transform:uppercase;letter-spacing:2px;display:flex;align-items:center;gap:0.4rem;}
+.audio-btns{display:flex;gap:0.5rem;}
+.audio-btns button{background:rgba(0,0,0,0.4);border:1px solid rgba(196,140,70,0.5);color:var(--ochre);
+  width:36px;height:36px;border-radius:50%;font-size:0.8rem;cursor:pointer;transition:all 0.3s;
+  display:flex;align-items:center;justify-content:center;padding:0;}
+.audio-btns button:hover,.audio-btns button.active{background:var(--ochre);color:var(--charcoal);border-color:var(--ochre);}
+.audio-btns button:disabled{opacity:0.3;}
+
+/* Bottom bar */
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;
+  align-items:center;padding:0.8rem 1rem;background:linear-gradient(to top,rgba(0,0,0,0.7),transparent);}
+.nav-btn{background:rgba(0,0,0,0.4);border:1px solid rgba(196,140,70,0.5);color:var(--ochre);
+  width:44px;height:44px;border-radius:50%;font-size:1rem;cursor:pointer;transition:all 0.3s;
+  display:flex;align-items:center;justify-content:center;padding:0;}
+.nav-btn:hover{background:var(--ochre);color:var(--charcoal);}
+.nav-btn:disabled{opacity:0.3;cursor:not-allowed;}
+.page-indicator{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--ochre);
+  letter-spacing:2px;text-transform:uppercase;}
+.progress-bar{position:fixed;top:0;left:0;height:3px;background:var(--ochre);z-index:60;
+  transition:width 0.5s cubic-bezier(0.19,1,0.22,1);}
+
+/* Card stacking */
+.card.current{transform:translateX(0);opacity:1;z-index:10;}
+.card.prev{transform:translateX(-100%);opacity:0;z-index:5;}
+.card.next{transform:translateX(100%);opacity:0;z-index:5;}
+.card.hidden{display:none;}
+
+/* Back cover */
+.back-cover{position:absolute;top:0;left:0;width:100%;height:100%;
+  background:var(--indigo);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;color:var(--ash);padding:2rem;z-index:1;}
+.back-cover h1{font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:0.5rem;}
+.back-cover .subtitle{font-size:1rem;opacity:0.9;margin-bottom:2rem;}
+.back-cover .author{font-size:0.85rem;opacity:0.6;}
+.back-cover .sdg{font-size:0.75rem;opacity:0.4;margin-top:1.5rem;}
+
+/* Grain */
+.grain{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;opacity:0.25;mix-blend-mode:overlay;}
+</style>
+</head>
+<body>
+
+<svg class="grain" viewBox="0 0 100 100"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
+
+<div class="cover-screen" id="cover">
+  <div class="sub">A Prophet's Lament</div>
+  <h1>Hosea &amp; Gomer</h1>
+  <div class="subtitle">A Story of Unfailing Love</div>
+  <div class="author">Created by Samuel Kurian Roy</div>
+  <button class="start-btn" onclick="openBook()">Begin Reading</button>
+</div>
+
+<div class="progress-bar" id="progress"></div>
+
+<div class="top-bar" id="topbar" style="display:none;">
+  <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Menu</a>
+  <div class="audio-btns">
+    <button id="narr-btn" onclick="toggleNarration()" title="Play Narration" disabled><i class="fas fa-play" id="narr-icon"></i></button>
+    <button id="music-btn" onclick="toggleMusic()" title="Background Music"><i class="fas fa-music"></i></button>
+  </div>
+</div>
+
+<div class="flipbook" id="flipbook" style="display:none;">
+
+    <div class="card" data-page="1">
+      <div class="card-bg" style="background-image:url('Images/1.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter I</span>
+        <h2>The Prophet's Calling</h2>
+        <div class="text-body"><span class="drop-cap">T</span>he prophet Hosea lived a quiet life, his days filled with prayer and the study of sacred scrolls. His heart was a still pool, reflecting the heavens. But one day, a voice, deep and resonant as thunder, broke the silence.<br><br>"Go," it commanded. "Take for yourself a wife of harlotry and have children of harlotry, for the land commits great harlotry by forsaking its God."</div>
+      </div>
+      <span class="page-num">01</span>
+    </div>
+    <div class="card" data-page="2">
+      <div class="card-bg" style="background-image:url('Images/2.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter II</span>
+        <h2>Meeting Gomer</h2>
+        <div class="text-body"><span class="drop-cap">H</span>is steps led him to the city's edge, to a house where laughter spilled like cheap wine. There he found Gomer. She was a flame in the darkness, her eyes holding both a desperate hunger and a deep-seated weariness.<br><br>When Hosea spoke her name and asked for her hand, she laughed, a sound as brittle as dry leaves. But in his gaze, she saw not judgment, but a strange and steady tenderness. She said yes.</div>
+      </div>
+      <span class="page-num">02</span>
+    </div>
+    <div class="card" data-page="3">
+      <div class="card-bg" style="background-image:url('Images/3.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter III</span>
+        <h2>A Quiet Harbor</h2>
+        <div class="text-body"><span class="drop-cap">F</span>or a time, Hosea's love was a strange and quiet harbor. A son was born to them, a child of their union, and God commanded he be named Jezreel, for a valley of judgment.<br><br>This firstborn, Hosea's own son, was a prophecy of sorrow, a shadow falling over their new family. But the quiet of Hosea's home felt like a cage to Gomer, and her eyes began to stray back toward the wild, chaotic life she had known.</div>
+      </div>
+      <span class="page-num">03</span>
+    </div>
+    <div class="card" data-page="4">
+      <div class="card-bg" style="background-image:url('Images/4.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter IV</span>
+        <h2>The First Betrayal</h2>
+        <div class="text-body"><span class="drop-cap">G</span>omer's restlessness gave way to betrayal. She sought out her old lovers, and soon she bore a daughter, a child not of Hosea's blood.<br><br>God's voice came again, cold as iron: "Name her Lo-ruhamah, for she is 'Not Pitied,' and I will no longer have pity on my people." The child was a living testament to Gomer's unfaithfulness, a constant pain in Hosea's home.</div>
+      </div>
+      <span class="page-num">04</span>
+    </div>
+    <div class="card" data-page="5">
+      <div class="card-bg" style="background-image:url('Images/5.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter V</span>
+        <h2>Deepening Shame</h2>
+        <div class="text-body"><span class="drop-cap">T</span>he shame deepened. After weaning her daughter, Gomer bore another son, also not of Hosea's line. The command from God was the final, devastating blow: "Name him Lo-ammi, for he is 'Not My People,' and I am not your God."<br><br>One night, Gomer vanished, leaving Hosea with his son Jezreel and the two children of her unfaithfulness, a house full of broken covenants.</div>
+      </div>
+      <span class="page-num">05</span>
+    </div>
+    <div class="card" data-page="6">
+      <div class="card-bg" style="background-image:url('Images/6.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter VI</span>
+        <h2>A Spectacle of Shame</h2>
+        <div class="text-body"><span class="drop-cap">H</span>osea's life became a spectacle of shame. He raised his own son and the two children of Gomer's adultery alone. Their names were a constant sermon to the townspeople who whispered behind his back.<br><br>Jezreel, Lo-ruhamah, Lo-ammi. Judgment, No Pity, Not My People. Every time he called to them, he preached his own heartbreak and his nation's sin. His love for them was real, but it was a love steeped in grief.</div>
+      </div>
+      <span class="page-num">06</span>
+    </div>
+    <div class="card" data-page="7">
+      <div class="card-bg" style="background-image:url('Images/7.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter VII</span>
+        <h2>Years Passed</h2>
+        <div class="text-body"><span class="drop-cap">Y</span>ears passed. Gomer's beauty, once a burning torch, faded to a guttering wick. The men who had desired her grew tired of her. She fell into debt, her freedom sold to settle her accounts.<br><br>She became a possession, passed from one master to another, her spirit worn as thin as her ragged clothes.</div>
+      </div>
+      <span class="page-num">07</span>
+    </div>
+    <div class="card" data-page="8">
+      <div class="card-bg" style="background-image:url('Images/8.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter VIII</span>
+        <h2>The Second Command</h2>
+        <div class="text-body"><span class="drop-cap">T</span>hen the voice came to Hosea again, not in thunder, but in a whisper that shook his soul. "Go again, love a woman who is loved by another man and is an adulteress."<br><br>The command was absurd, impossible. It meant loving the source of his deepest pain. It meant loving Gomer.</div>
+      </div>
+      <span class="page-num">08</span>
+    </div>
+    <div class="card" data-page="9">
+      <div class="card-bg" style="background-image:url('Images/9.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter IX</span>
+        <h2>Redemption</h2>
+        <div class="text-body"><span class="drop-cap">H</span>e found her in the slave market. She stood on the auction block, her head bowed in shame. Hosea stepped forward. "I will buy her," he said, his voice clear and strong.<br><br>He paid the price—fifteen shekels of silver and a homer and a lethech of barley—the full price for a common slave.</div>
+      </div>
+      <span class="page-num">09</span>
+    </div>
+    <div class="card" data-page="10">
+      <div class="card-bg" style="background-image:url('Images/10.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter X</span>
+        <h2>Beginning of Healing</h2>
+        <div class="text-body"><span class="drop-cap">H</span>e brought her home. Not as a slave, but as his wife. He looked at her, at the ruins of the woman he had married, and said, "You must stay with me for many days; you shall not play the harlot, or belong to another man. So I will also be to you."<br><br>It was not the end of the pain, but the beginning of a long healing. It was a love that refused to let go, a love that bought back what was broken and promised, in the quiet darkness, the hope of a new dawn.</div>
+      </div>
+      <span class="page-num">10</span>
+    </div>
+    <div class="card" data-page="11">
+      <div class="card-bg" style="background-image:url('Images/11.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter XI</span>
+        <h2>The Nature of Love</h2>
+        <div class="text-body"><div class="scripture">Love is patient, love is kind. It does not envy, it does not boast, it is not proud. It does not dishonor others, it is not self-seeking, it is not easily angered, it keeps no record of wrongs. Love does not delight in evil but rejoices with the truth. It always protects, always trusts, always hopes, always perseveres. Love never fails.</div><p style="text-align:right;font-style:italic;font-size:0.9rem;">— 1 Corinthians 13:4-8a</p></div>
+      </div>
+      <span class="page-num">11</span>
+    </div>
+    <div class="card" data-page="12">
+      <div class="card-bg" style="background-image:url('Images/12.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter XII</span>
+        <h2>What Gomer Deserved</h2>
+        <div class="text-body"><span class="drop-cap">W</span>hat did Gomer truly deserve? By the law of her people and the word of God, her path should have been walled with thorns. She should have been stripped bare, her shame exposed to the lovers she chased.<br><br>The grain, the wine, the oil—all the gifts she took for granted—should have been taken away, leaving her like a parched desert, a ruined vineyard. Her feasts should have turned to mourning. This was the judgment for her betrayal, the bitter harvest of her choices.</div>
+      </div>
+      <span class="page-num">12</span>
+    </div>
+    <div class="card" data-page="13">
+      <div class="card-bg" style="background-image:url('Images/13.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter XIII</span>
+        <h2>The Parallel to Christ</h2>
+        <div class="text-body"><span class="drop-cap">T</span>his story, etched in the lives of a prophet and his unfaithful wife, is not just about them. It is a mirror reflecting a much larger love story.<br><br>Hosea, in his unwavering, pursuing love, is a living picture of God. His heart, broken by betrayal, mirrors the grief of a Creator whose people turn away.</div>
+      </div>
+      <span class="page-num">13</span>
+    </div>
+    <div class="card" data-page="14">
+      <div class="card-bg" style="background-image:url('Images/14.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter XIV</span>
+        <h2>Humanity's Betrayal</h2>
+        <div class="text-body"><span class="drop-cap">A</span>nd Gomer, in her restlessness and her constant search for something more, represents humanity. We, too, chase after fleeting pleasures and empty promises, forgetting the source of all true love and provision.<br><br>We take the gifts of life—the grain, the wine, the oil—and forget the Giver, offering our hearts to lesser things. Our sins are like Gomer's adultery. Each time we choose our own way, we break the heart of God.<br><br>We wander from the safety of His love, selling ourselves into the slavery of sin, ending up broken and ashamed on an auction block of our own making.</div>
+      </div>
+      <span class="page-num">14</span>
+    </div>
+    <div class="card" data-page="15">
+      <div class="card-bg" style="background-image:url('Images/15.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter XV</span>
+        <h2>God's Pursuit</h2>
+        <div class="text-body"><span class="drop-cap">B</span>ut the story does not end in judgment. Just as Hosea went to the slave market, God, in His infinite mercy, came to find us. He did not wait for us to be worthy.<br><br>He came to the auction block of our shame and paid the ultimate price to buy us back. Not with silver or barley, but with the precious blood of his Son, Jesus.</div>
+      </div>
+      <span class="page-num">15</span>
+    </div>
+    <div class="card" data-page="16">
+      <div class="card-bg" style="background-image:url('Images/16.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter XVI</span>
+        <h2>The Ultimate Price Paid</h2>
+        <div class="text-body"><span class="drop-cap">G</span>omer was never made to pay the full price for her sin. She deserved to be stripped naked, her shame put on public display. But she was spared.<br><br>Instead, Jesus, who was without any sin, took her punishment. He was the one stripped of all his clothes, his nakedness exposed to the mocking crowds. He absorbed the shame that was meant for Gomer, the shame that was meant for us.</div>
+      </div>
+      <span class="page-num">16</span>
+    </div>
+    <div class="card" data-page="17">
+      <div class="card-bg" style="background-image:url('Images/17.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter XVII</span>
+        <h2>The Scourging</h2>
+        <div class="text-body"><span class="drop-cap">T</span>he law demanded punishment, and the punishment was brutal. Jesus was tied to a post and lashed thirty-nine times, the maximum penalty allowed.<br><br>The whip was not a simple strap of leather; it was a scourge, tipped with bone and metal, designed to rip and tear. With each strike, flesh was pulled from his body. Blood oozed from countless wounds until his back was a shredded ruin and his rib cage was exposed. He hardly looked human.</div>
+      </div>
+      <span class="page-num">17</span>
+    </div>
+    <div class="card" data-page="18">
+      <div class="card-bg" style="background-image:url('Images/18.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter XVIII</span>
+        <h2>The Journey to the Cross</h2>
+        <div class="text-body"><span class="drop-cap">A</span>nd that was only the beginning. In this mangled state, a crossbeam weighing more than fifty kilograms was heaved onto his bleeding shoulders. He was forced to carry it for a kilometer through the city streets.<br><br>The people he came to save now cursed him, spat on him, and tried to trip him, laughing when he fell. He endured it all for a sin he did not commit.</div>
+      </div>
+      <span class="page-num">18</span>
+    </div>
+    <div class="card" data-page="19">
+      <div class="card-bg" style="background-image:url('Images/19.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter XIX</span>
+        <h2>The Agony of the Cross</h2>
+        <div class="text-body"><span class="drop-cap">T</span>he worst suffering was on the cross. Iron spikes were driven through the nerves in his hands and through his feet, pinning him to the wood.<br><br>To breathe, he had to push his entire body upward, scraping his exposed ribs against the splintered timber. Every single breath was a fresh wave of blinding, searing pain. He hung there for hours, suspended between heaven and earth.</div>
+      </div>
+      <span class="page-num">19</span>
+    </div>
+    <div class="card" data-page="20">
+      <div class="card-bg" style="background-image:url('Images/20.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter XX</span>
+        <h2>The Power of Choice</h2>
+        <div class="text-body"><span class="drop-cap">Y</span>et, he was not powerless. He is the commander of the angel armies of the Lord. One word from his lips and twelve legions of angels would have descended to wipe the planet clean.<br><br>But he remained silent. He chose the nails. He chose the pain. He chose to suffer, to endure it all in the name of love, until every last drop of his blood was shed to pay our debt and break the shackles of sin forever.</div>
+      </div>
+      <span class="page-num">20</span>
+    </div>
+    <div class="card" data-page="21">
+      <div class="card-bg" style="background-image:url('Images/21.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Chapter XXI</span>
+        <h2>Redeeming Love</h2>
+        <div class="text-body"><span class="drop-cap">T</span>his is the love that bought us back. He brings us home, not as slaves, but as beloved children. He clothes us in righteousness and promises to be with us forever.<br><br>His is a love that redeems, a love that restores, a love that sees the ruins of our lives and promises to build something beautiful. It is a love that never, ever fails.</div>
+      </div>
+      <span class="page-num">21</span>
+    </div>
+    <div class="card" data-page="22">
+      <div class="card-bg" style="background-image:url('Images/22.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">References</span>
+        <h2>Biblical Sources</h2>
+        <div class="text-body"><div class="references"><p>The story and theological parallels in this book are drawn from the following sources:</p><ul><li><strong>The Book of Hosea:</strong> Chapters 1, 2, and 3</li><li><strong>1 Corinthians 13:4-8a:</strong> The nature of love</li><li><strong>The Gospel of Matthew:</strong> Accounts of the crucifixion (Matthew 26:53)</li><li><strong>The Gospel of John:</strong> Details of the crucifixion (John 19:30)</li><li><strong>The Gospel of Luke and Mark:</strong> The scourging and journey to the cross</li><li><strong>Isaiah 53:5:</strong> Substitutionary suffering</li></ul></div></div>
+      </div>
+      <span class="page-num">22</span>
+    </div>
+    <div class="card" data-page="23">
+      <div class="card-bg" style="background-image:url('Images/23.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        
+        <h2>Samuel Kurian Roy</h2>
+        <div class="text-body"><p style="text-align:center;font-size:1.1rem;">Created by</p><h2 style="text-align:center;font-size:2rem;margin-bottom:1rem;">Samuel Kurian Roy</h2><p style="text-align:center;font-style:italic;font-size:1.3rem;">S.D.G.</p><div class="divider" style="width:60%;margin:1.5rem auto;"></div><p style="text-align:center;font-size:0.9rem;">For inquiries: storybookssdg@gmail.com</p></div>
+      </div>
+      <span class="page-num">23</span>
+    </div>
+    <div class="card" data-page="24">
+      <div class="card-bg" style="background-image:url('Images/24.png')"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <span class="chapter-label">Epilogue</span>
+        <h2>The End</h2>
+        <div class="text-body"><span class="drop-cap">T</span>hank you for reading this story of unfailing love. May it remind you of the depth of God's love for each of us, a love that pursues, redeems, and restores.<div class="divider"></div><div class="scripture">For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.</div><p style="text-align:right;font-style:italic;font-size:0.9rem;">— John 3:16</p></div>
+      </div>
+      <span class="page-num">24</span>
+    </div>
+  <div class="card back-cover-card" data-page="back">
+    <div class="back-cover">
+      <h1>Hosea &amp; Gomer</h1>
+      <div class="subtitle">A Story of Unfailing Love</div>
+      <div class="author">Created by Samuel Kurian Roy</div>
+      <div class="sdg">S.D.G. — Soli Deo Gloria</div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar" id="bottombar" style="display:none;">
+  <button class="nav-btn" id="prev-btn" onclick="goPrev()"><i class="fas fa-chevron-left"></i></button>
+  <span class="page-indicator" id="indicator">1 / 24</span>
+  <button class="nav-btn" id="next-btn" onclick="goNext()"><i class="fas fa-chevron-right"></i></button>
+</div>
+
+<audio id="narration" preload="none"></audio>
+<audio id="bgmusic" preload="none" loop></audio>
+
+<script>
+const totalPages=24;
+const audioPages=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,24];
+let cur=0, narrPlaying=false, musicOn=false;
+const cards=document.querySelectorAll('.card');
+const narr=document.getElementById('narration');
+const bgm=document.getElementById('bgmusic');
+
+function getSong(p){
+  if(p>=1&&p<=3)return'Songs/Part_1.mp3';
+  if(p>=4&&p<=8)return'Songs/Part_2.mp3';
+  if(p>=9&&p<=11)return'Songs/Part_3.mp3';
+  if(p>=12&&p<=14)return'Songs/Part_4.mp3';
+  if(p>=15&&p<=17)return'Songs/Part_5.mp3';
+  if(p>=18&&p<=24)return'Songs/Part_6.mp3';
+  return'';
+}
+
+function openBook(){
+  document.getElementById('cover').classList.add('hidden');
+  document.getElementById('flipbook').style.display='block';
+  document.getElementById('topbar').style.display='';
+  document.getElementById('bottombar').style.display='';
+  updateCards();
+}
+
+function updateCards(){
+  cards.forEach((c,i)=>{
+    c.classList.remove('current','prev','next','hidden');
+    if(i===cur)c.classList.add('current');
+    else if(i===cur-1)c.classList.add('prev');
+    else if(i===cur+1)c.classList.add('next');
+    else c.classList.add('hidden');
+    // Reset scroll position
+    const content=c.querySelector('.card-content');
+    if(content)content.scrollTop=0;
+  });
+  const pageNum=cur<totalPages?cur+1:totalPages;
+  document.getElementById('indicator').textContent=pageNum+' / '+totalPages;
+  document.getElementById('prev-btn').disabled=cur<=0;
+  document.getElementById('next-btn').disabled=cur>=cards.length-1;
+  document.getElementById('progress').style.width=((cur/(cards.length-1))*100)+'%';
+  loadNarration();
+  handleMusic();
+}
+
+function loadNarration(){
+  narr.pause();narr.currentTime=0;narrPlaying=false;
+  const pg=cur+1;
+  const btn=document.getElementById('narr-btn');
+  if(audioPages.includes(pg)){
+    narr.src='Audio/'+pg+'.mp3';
+    btn.disabled=false;
+  }else{narr.src='';btn.disabled=true;}
+  document.getElementById('narr-icon').className='fas fa-play';
+  btn.classList.remove('active');
+}
+
+function handleMusic(){
+  if(!musicOn)return;
+  const pg=cur+1;
+  const song=getSong(pg);
+  const curSong=bgm.src?bgm.src.split('/').pop().split('?')[0]:'';
+  const newSong=song?song.split('/').pop():'';
+  if(song&&curSong!==newSong){bgm.src=song;bgm.volume=0.4;bgm.play().catch(()=>{});}
+  else if(!song){bgm.pause();}
+}
+
+function toggleNarration(){
+  if(!narr.src)return;
+  if(narrPlaying){narr.pause();narrPlaying=false;document.getElementById('narr-icon').className='fas fa-play';document.getElementById('narr-btn').classList.remove('active');}
+  else{narr.play().then(()=>{narrPlaying=true;document.getElementById('narr-icon').className='fas fa-pause';document.getElementById('narr-btn').classList.add('active');if(musicOn)bgm.volume=0.08;}).catch(()=>{});}
+}
+
+function toggleMusic(){
+  musicOn=!musicOn;
+  const btn=document.getElementById('music-btn');
+  if(musicOn){btn.classList.add('active');handleMusic();}
+  else{btn.classList.remove('active');bgm.pause();}
+}
+
+narr.addEventListener('ended',()=>{narrPlaying=false;document.getElementById('narr-icon').className='fas fa-play';document.getElementById('narr-btn').classList.remove('active');if(musicOn)bgm.volume=0.4;});
+
+function goNext(){if(cur<cards.length-1){cur++;updateCards();}}
+function goPrev(){if(cur>0){cur--;updateCards();}}
+
+// Touch swipe
+let tx=0,ty=0,swiping=false;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;swiping=true;});
+document.addEventListener('touchend',e=>{
+  if(!swiping)return;swiping=false;
+  const dx=e.changedTouches[0].clientX-tx;
+  const dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>50){
+    if(dx<0)goNext();else goPrev();
+  }
+});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')goNext();if(e.key==='ArrowLeft')goPrev();});
+</script>
+</body>
+</html>

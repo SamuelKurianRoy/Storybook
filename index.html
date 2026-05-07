@@ -9,8 +9,7 @@
     <title>Hosea and Gomer - A Story of Unfailing Love</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,800;1,9..40,400&family=JetBrains+Mono:wght@300;500&family=Playfair+Display:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@300;500&display=swap" rel="stylesheet">
     <style>
         :root {
             --pigment-ochre: #c48c46;
@@ -18,10 +17,6 @@
             --pigment-indigo: #2c364c;
             --pigment-ash: #e8e4db;
             --pigment-charcoal: #1a1817;
-            --page-width: 420px;
-            --page-height: 580px;
-            --transition-speed: 0.8s;
-            --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
         }
 
         * {
@@ -31,2064 +26,225 @@
         }
 
         body {
+            background-color: var(--pigment-charcoal);
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(142, 74, 49, 0.15), transparent),
+                url("https://www.transparenttextures.com/patterns/dark-matter.png");
             font-family: 'Crimson Text', serif;
-            background: var(--book-bg);
-            color: var(--text-color);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            color: var(--pigment-ash);
             overflow: hidden;
         }
 
-        .book-container {
-            width: 95%;
-            max-width: 1400px;
-            height: 85vh;
-            max-height: 800px;
-            position: relative;
-            perspective: 2500px;
-            perspective-origin: 50% 50%;
-            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3));
-        }
-
-        .book {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
-        }
-
-        /* Book positioning states */
-        .book.position-center {
-            transform: translateX(0);
-        }
-
-        .book.position-left {
-            transform: translateX(-25%);
-        }
-
-        .book.position-right {
-            transform: translateX(25%);
-        }
-
-        /* Book spine in the center */
-        .book-spine {
-            position: absolute;
-            left: 50%;
-            top: 0;
-            width: 40px;
-            height: 100%;
-            background: linear-gradient(to right, 
-                #2a2520 0%, 
-                #3a2f2a 20%, 
-                #4a3f3a 50%, 
-                #3a2f2a 80%, 
-                #2a2520 100%
-            );
-            transform: translateX(-50%) rotateY(0deg);
-            box-shadow: 
-                inset 0 0 20px rgba(0, 0, 0, 0.5),
-                0 0 30px rgba(0, 0, 0, 0.3);
-            z-index: 100;
-            border-left: 1px solid #1a1510;
-            border-right: 1px solid #1a1510;
-            transition: opacity 0.5s ease;
-        }
-
-        /* Hide spine on cover page */
-        .book.on-cover .book-spine {
-            opacity: 0;
-        }
-
-        /* Top and bottom book binding edges */
-        .book-binding-top,
-        .book-binding-bottom {
-            position: absolute;
-            left: 0;
-            right: 0;
-            height: 15px;
-            background: linear-gradient(to bottom,
-                #2a2520 0%,
-                #3a2f2a 30%,
-                #4a3f3a 50%,
-                #3a2f2a 70%,
-                #2a2520 100%
-            );
-            z-index: 101;
-            box-shadow: 
-                inset 0 2px 5px rgba(0, 0, 0, 0.4),
-                0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .book-binding-top {
-            top: 0;
-            border-bottom: 1px solid #1a1510;
-        }
-
-        .book-binding-bottom {
-            bottom: 0;
-            border-top: 1px solid #1a1510;
-        }
-
-        /* Page edges - visible thickness on sides */
-        .page-edges {
-            position: absolute;
-            top: 15px;
-            bottom: 15px;
-            width: 0;
-            z-index: 50;
-        }
-
-        .page-edges-left {
-            left: 0;
-            border-left: 8px solid #f5f0e8;
-            box-shadow: 
-                inset 2px 0 3px rgba(0, 0, 0, 0.1),
-                -2px 0 5px rgba(0, 0, 0, 0.15);
-        }
-
-        .page-edges-right {
-            right: 0;
-            border-right: 8px solid #f5f0e8;
-            box-shadow: 
-                inset -2px 0 3px rgba(0, 0, 0, 0.1),
-                2px 0 5px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Page edge layers for depth effect */
-        .page-edges::before,
-        .page-edges::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-        }
-
-        .page-edges-left::before {
-            left: -6px;
-            width: 6px;
-            background: linear-gradient(to right, #e8e3db, #f5f0e8);
-            box-shadow: -1px 0 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .page-edges-left::after {
-            left: -4px;
-            width: 4px;
-            background: linear-gradient(to right, #ddd8d0, #e8e3db);
-            box-shadow: -1px 0 2px rgba(0, 0, 0, 0.08);
-        }
-
-        .page-edges-right::before {
-            right: -6px;
-            width: 6px;
-            background: linear-gradient(to left, #e8e3db, #f5f0e8);
-            box-shadow: 1px 0 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .page-edges-right::after {
-            right: -4px;
-            width: 4px;
-            background: linear-gradient(to left, #ddd8d0, #e8e3db);
-            box-shadow: 1px 0 2px rgba(0, 0, 0, 0.08);
-        }
-
-        /* Dynamic page edge visibility based on position */
-        .book.on-cover .page-edges-left {
-            opacity: 0;
-        }
-
-        .book.position-left .page-edges-left {
-            border-left-width: 12px;
-        }
-
-        .book.position-right .page-edges-right {
-            border-right-width: 12px;
-        }
-
-        /* Page spread container */
-        .page-spread {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            display: flex;
-            transform-style: preserve-3d;
-            will-change: transform;
-        }
-
-        /* Left and right page halves */
-        .page-half {
-            width: 50%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            will-change: transform;
-            transform: translateZ(0);
-        }
-
-        .page-half.left {
-            transform-origin: right center;
-        }
-
-        .page-half.right {
-            transform-origin: left center;
-        }
-
-        /* Individual page */
-        .page {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: var(--page-color);
-            transform-style: preserve-3d;
-            backface-visibility: hidden;
-            padding: 50px 60px 100px 60px;
-            overflow: hidden;
-            will-change: transform;
-            transform: translateZ(0);
-        }
-
-        /* Page depth/thickness effect */
-        .page::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: linear-gradient(to bottom,
-                rgba(0, 0, 0, 0.1) 0%,
-                rgba(0, 0, 0, 0.05) 50%,
-                rgba(0, 0, 0, 0.1) 100%
-            );
-            z-index: 1;
-        }
-
-        .page-half.left .page::before {
-            right: 0;
-            background: linear-gradient(to right,
-                transparent,
-                rgba(0, 0, 0, 0.08)
-            );
-        }
-
-        .page-half.right .page::before {
-            left: 0;
-            background: linear-gradient(to left,
-                transparent,
-                rgba(0, 0, 0, 0.08)
-            );
-        }
-
-        /* Paper texture */
-        .page::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                repeating-linear-gradient(
-                    0deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(0, 0, 0, 0.008) 2px,
-                    rgba(0, 0, 0, 0.008) 4px
-                );
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        /* Left page styling */
-        .page-half.left .page {
-            border-radius: 10px 0 0 10px;
-            box-shadow: 
-                inset -3px 0 10px var(--shadow-light),
-                -5px 0 20px var(--shadow-medium);
-        }
-
-        /* Right page styling */
-        .page-half.right .page {
-            border-radius: 0 10px 10px 0;
-            box-shadow: 
-                inset 3px 0 10px var(--shadow-light),
-                5px 0 20px var(--shadow-medium);
-        }
-
-        /* Page stack layers for depth */
-        .page-stack {
-            position: absolute;
-            pointer-events: none;
-        }
-
-        .page-stack.left {
-            left: 0;
-            top: 5px;
-            bottom: 5px;
-            width: calc(50% - 20px);
-        }
-
-        .page-stack.right {
-            right: 0;
-            top: 5px;
-            bottom: 5px;
-            width: calc(50% - 20px);
-        }
-
-        .stack-layer {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: #fafaf5;
-            border: 1px solid #e5e5e0;
-        }
-
-        .page-stack.left .stack-layer {
-            border-radius: 8px 0 0 8px;
-            box-shadow: -2px 0 8px var(--shadow-light);
-        }
-
-        .page-stack.right .stack-layer {
-            border-radius: 0 8px 8px 0;
-            box-shadow: 2px 0 8px var(--shadow-light);
-        }
-
-        .stack-layer:nth-child(1) {
-            transform: translateX(0) translateZ(-1px);
-            opacity: 0.9;
-        }
-
-        .stack-layer:nth-child(2) {
-            transform: translateX(0) translateZ(-2px);
-            opacity: 0.8;
-        }
-
-        .stack-layer:nth-child(3) {
-            transform: translateX(0) translateZ(-3px);
-            opacity: 0.7;
-        }
-
-        /* Page content */
-        .page-content {
-            position: relative;
-            z-index: 2;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .page-text {
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-
-        /* Custom scrollbar */
-        .page-text::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .page-text::-webkit-scrollbar-track {
-            background: rgba(141, 110, 99, 0.1);
-            border-radius: 4px;
-        }
-
-        .page-text::-webkit-scrollbar-thumb {
-            background: rgba(141, 110, 99, 0.4);
-            border-radius: 4px;
-        }
-
-        .page-text::-webkit-scrollbar-thumb:hover {
-            background: rgba(141, 110, 99, 0.6);
-        }
-
-        .page-image {
-            flex: 0 0 40%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .page-image img {
-            max-width: 100%;
-            max-height: 100%;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px var(--shadow-light);
-        }
-
-        /* Typography */
-        h1, h2 {
-            font-family: 'Playfair Display', serif;
-            color: var(--heading-color);
-            margin-bottom: 20px;
-            line-height: 1.3;
-        }
-
-        h1 {
-            font-size: 2.5rem;
+        .chooser {
             text-align: center;
-            margin-bottom: 30px;
+            padding: 2rem;
+            max-width: 600px;
+            animation: fadeIn 1.2s ease-out;
         }
 
-        h2 {
-            font-size: 2rem;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        p {
-            font-size: 1.3rem;
-            line-height: 1.8;
-            margin-bottom: 15px;
-            text-align: justify;
-        }
-
-        .drop-cap {
-            float: left;
-            font-size: 4.5rem;
-            line-height: 3.5rem;
-            padding-right: 8px;
-            margin-top: -4px;
+        .chooser h1 {
             font-family: 'Playfair Display', serif;
-            color: var(--accent-color);
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: var(--pigment-ash);
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
         }
 
-        .scripture {
-            font-style: italic;
-            padding: 15px;
-            background-color: rgba(141, 110, 99, 0.1);
-            border-left: 3px solid var(--accent-color);
-            margin: 20px 0;
-            font-size: 1.2rem;
-        }
-
-        .references {
+        .chooser .subtitle {
             font-size: 1.1rem;
-        }
-
-        .references h2 {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-        }
-
-        .references ul {
-            list-style-type: none;
-            padding-left: 20px;
-        }
-
-        .references li {
-            margin-bottom: 8px;
+            opacity: 0.7;
+            margin-bottom: 2.5rem;
         }
 
         .divider {
             height: 2px;
-            background: linear-gradient(to right, transparent, var(--accent-color), transparent);
-            margin: 20px 0;
+            background: linear-gradient(to right, transparent, var(--pigment-ochre), transparent);
+            margin: 1.5rem auto;
+            width: 60%;
         }
 
-        /* Page turning animations */
-        .page-half.turning-forward {
-            animation: turnPageForward 1.2s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
-            z-index: 200;
+        .auto-msg {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--pigment-ochre);
+            margin-bottom: 2rem;
+            opacity: 0.8;
         }
 
-        .page-half.turning-backward {
-            animation: turnPageBackward 1.2s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
-            z-index: 200;
+        .btn-group {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
-        @keyframes turnPageForward {
-            0% {
-                transform: rotateY(0deg) translateZ(0);
-            }
-            100% {
-                transform: rotateY(-180deg) translateZ(0);
-            }
-        }
-
-        @keyframes turnPageBackward {
-            0% {
-                transform: rotateY(-180deg) translateZ(0);
-            }
-            100% {
-                transform: rotateY(0deg) translateZ(0);
-            }
-        }
-
-        /* Flipped state */
-        .page-half.flipped {
-            transform: rotateY(-180deg);
-        }
-
-        /* Hidden pages */
-        .page-spread.hidden {
-            display: none;
-        }
-
-        /* Cover page special styling */
-        .cover-page {
+        .choose-btn {
+            background: transparent;
+            border: 1px solid var(--pigment-ochre);
+            color: var(--pigment-ochre);
+            padding: 1.2rem 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            text-decoration: none;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            text-align: center;
-            background-image: url('Cover.png');
-            background-size: cover;
-            background-position: center;
+            gap: 0.8rem;
+            min-width: 180px;
             position: relative;
-            box-shadow: 
-                inset 3px 0 10px var(--shadow-light),
-                -10px 0 30px var(--shadow-dark),
-                5px 0 20px var(--shadow-medium) !important;
-        }
-
-        .cover-page::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 0;
-        }
-
-        .cover-page > * {
-            position: relative;
-            z-index: 2;
-        }
-
-        .cover-page h1 {
-            font-size: 3.5rem;
-            margin-bottom: 20px;
-            color: #ffffff;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-        }
-
-        .cover-page .subtitle {
-            font-size: 1.3rem;
-            font-style: italic;
-            color: #f5e9d9;
-            margin-bottom: 40px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-        }
-
-        .cover-page .author {
-            font-size: 1.1rem;
-            margin-top: 40px;
-            color: #f5e9d9;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-        }
-
-        /* Background image pages */
-        .bg-page {
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            background-attachment: scroll;
-        }
-
-        .bg-page::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1;
-        }
-
-        .bg-page .page-content {
-            position: relative;
-            z-index: 2;
-        }
-
-        .bg-page h1, .bg-page h2 {
-            color: #ffffff;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-        }
-
-        .bg-page p {
-            color: #f5f5f5;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-        }
-
-        .bg-page .drop-cap {
-            color: #ffd54f;
-        }
-
-        .bg-page .scripture {
-            background-color: rgba(255, 255, 255, 0.2);
-            border-left: 3px solid #ffd54f;
-            color: #f5f5f5;
-        }
-
-        /* Navigation */
-        .navigation {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 20px;
-            z-index: 300;
-        }
-
-        .nav-btn {
-            background: rgba(93, 64, 55, 0.9);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 15px var(--shadow-dark);
-        }
-
-        .nav-btn:hover:not(:disabled) {
-            background: rgba(93, 64, 55, 1);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px var(--shadow-dark);
-        }
-
-        .nav-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        .page-indicator {
-            position: absolute;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            font-size: 0.95rem;
-            color: var(--accent-color);
-            z-index: 300;
-            font-weight: 600;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 8px 20px;
-            border-radius: 20px;
-            box-shadow: 0 2px 10px var(--shadow-light);
-        }
-
-        /* Top controls */
-        .page-nav-menu {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 300;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .page-select {
-            background: rgba(93, 64, 55, 0.9);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            font-family: 'Crimson Text', serif;
-            box-shadow: 0 4px 10px var(--shadow-dark);
-            max-width: 250px;
-        }
-
-        .page-select:hover {
-            background: rgba(93, 64, 55, 1);
-            transform: translateY(-2px);
-        }
-
-        .jump-to-page-btn {
-            background: rgba(93, 64, 55, 0.9);
-            color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px var(--shadow-dark);
-        }
-
-        .jump-to-page-btn:hover {
-            background: rgba(93, 64, 55, 1);
-            transform: scale(1.1);
-        }
-
-        .audio-controls {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 300;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .audio-btn {
-            background: rgba(93, 64, 55, 0.9);
-            color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px var(--shadow-dark);
-        }
-
-        .audio-btn:hover {
-            background: rgba(93, 64, 55, 1);
-            transform: scale(1.1);
-        }
-
-        .audio-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .audio-btn.playing {
-            background: rgba(141, 110, 99, 0.9);
-        }
-
-        .autoplay-btn.disabled {
-            background: rgba(180, 50, 50, 0.9);
-        }
-
-        .volume-control {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(93, 64, 55, 0.9);
-            padding: 8px 12px;
-            border-radius: 25px;
-            box-shadow: 0 4px 10px var(--shadow-dark);
-        }
-
-        .volume-icon {
-            color: white;
-            font-size: 1rem;
-            min-width: 20px;
-        }
-
-        .volume-slider {
-            width: 80px;
-            height: 4px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 5px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: white;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .volume-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-        }
-
-        .volume-slider::-moz-range-thumb {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: white;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s ease;
-        }
-
-        .mute-btn {
-            background: rgba(93, 64, 55, 0.9);
-            color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px var(--shadow-dark);
-        }
-
-        .mute-btn:hover {
-            background: rgba(93, 64, 55, 1);
-            transform: scale(1.1);
-        }
-
-        .mute-btn.muted {
-            background: rgba(180, 50, 50, 0.9);
-        }
-
-        /* References pages text fix */
-        #spread-11 .page.bg-page p,
-        #spread-11 .page.bg-page li,
-        #spread-11 .page.bg-page h2,
-        #spread-11 .page.bg-page strong,
-        #spread-12 .page.bg-page p,
-        #spread-12 .page.bg-page li,
-        #spread-12 .page.bg-page h2,
-        #spread-12 .page.bg-page strong {
-            color: #ffffff !important;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
-        }
-
-        /* Loading indicator */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            opacity: 1;
-            transition: opacity 0.5s ease;
-        }
-
-        .loading-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .loading-text {
-            color: #f5e9d9;
-            font-size: 1.5rem;
-            font-family: 'Playfair Display', serif;
-            margin-bottom: 20px;
-        }
-
-        .loading-bar {
-            width: 300px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
             overflow: hidden;
         }
 
-        .loading-progress {
+        .choose-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(196, 140, 70, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .choose-btn:hover::before {
+            left: 100%;
+        }
+
+        .choose-btn:hover {
+            background: var(--pigment-ochre);
+            color: var(--pigment-charcoal);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(196, 140, 70, 0.3);
+        }
+
+        .choose-btn .icon {
+            font-size: 2rem;
+        }
+
+        .choose-btn .label {
+            font-size: 0.65rem;
+            opacity: 0.7;
+            letter-spacing: 2px;
+        }
+
+        .auto-redirect {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            opacity: 0.5;
+        }
+
+        .auto-redirect span {
+            color: var(--pigment-ochre);
+            font-weight: 600;
+        }
+
+        .loading-bar {
+            width: 200px;
+            height: 2px;
+            background: rgba(196, 140, 70, 0.2);
+            margin: 1rem auto 0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .loading-bar .fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--accent-color), #c9a881);
+            background: var(--pigment-ochre);
             width: 0%;
-            transition: width 0.3s ease;
-            border-radius: 3px;
+            transition: width 3s linear;
         }
 
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-top-color: var(--accent-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .book-container {
-                max-width: 1000px;
-                height: 75vh;
-            }
-
-            .page {
-                padding: 40px 50px 90px 50px;
-            }
-
-            h1 {
-                font-size: 2.2rem;
-            }
-
-            h2 {
-                font-size: 1.8rem;
-            }
-
-            p {
-                font-size: 1.2rem;
-            }
-
-            .cover-page h1 {
-                font-size: 3rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 0;
-            }
-
-            .book-container {
-                width: 100%;
-                height: 100vh;
-                max-width: 100%;
-                max-height: none;
-            }
-
-            .book-spine {
-                width: 20px;
-            }
-
-            .book-binding-top,
-            .book-binding-bottom {
-                height: 10px;
-            }
-
-            .page-edges-left,
-            .page-edges-right {
-                top: 10px;
-                bottom: 10px;
-            }
-
-            .page-edges-left {
-                border-left-width: 5px;
-            }
-
-            .page-edges-right {
-                border-right-width: 5px;
-            }
-
-            /* Adjust book positioning for mobile */
-            .book.position-left {
-                transform: translateX(-15%);
-            }
-
-            .book.position-right {
-                transform: translateX(15%);
-            }
-
-            .page {
-                padding: 30px 25px 80px 25px;
-            }
-
-            .page-half.left .page {
-                border-radius: 0;
-            }
-
-            .page-half.right .page {
-                border-radius: 0;
-            }
-
-            h1 {
-                font-size: 1.8rem;
-            }
-
-            .cover-page h1 {
-                font-size: 2.2rem;
-            }
-
-            h2 {
-                font-size: 1.4rem;
-            }
-
-            p {
-                font-size: 1rem;
-                line-height: 1.6;
-            }
-
-            .drop-cap {
-                font-size: 3.5rem;
-                line-height: 2.8rem;
-            }
-
-            .scripture {
-                font-size: 1rem;
-                padding: 12px;
-            }
-
-            .navigation {
-                bottom: 20px;
-                gap: 10px;
-            }
-
-            .nav-btn {
-                padding: 10px 18px;
-                font-size: 0.9rem;
-            }
-
-            .page-indicator {
-                bottom: 70px;
-                font-size: 0.85rem;
-                padding: 6px 15px;
-            }
-
-            .audio-controls {
-                top: 10px;
-                right: 10px;
-                flex-wrap: wrap;
-            }
-
-            .audio-btn {
-                width: 45px;
-                height: 45px;
-                font-size: 1rem;
-            }
-
-            .page-nav-menu {
-                top: 10px;
-                left: 10px;
-            }
-
-            .jump-to-page-btn {
-                width: 45px;
-                height: 45px;
-                font-size: 1rem;
-            }
-
-            .page-select {
-                font-size: 0.85rem;
-                padding: 8px 12px;
-                max-width: 140px;
-            }
-
-            .page-stack {
-                display: none;
-            }
-
-            .loading-text {
-                font-size: 1.2rem;
-                padding: 0 20px;
-                text-align: center;
-            }
-
-            .loading-bar {
-                width: 80%;
-                max-width: 250px;
-            }
-
-            .loading-spinner {
-                width: 40px;
-                height: 40px;
-            }
+        /* Grain overlay */
+        .grain-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.3;
+            mix-blend-mode: overlay;
         }
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loading-overlay">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Preparing your storybook...</div>
-        <div class="loading-bar">
-            <div class="loading-progress" id="loading-progress"></div>
+
+    <svg class="grain-overlay" viewBox="0 0 100 100">
+        <filter id="noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+            <feColorMatrix type="saturate" values="0" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#noise)" />
+    </svg>
+
+    <div class="chooser">
+        <h1>Hosea & Gomer</h1>
+        <div class="subtitle">A Story of Unfailing Love</div>
+        <div class="divider"></div>
+        <p class="auto-msg" id="auto-msg">Detecting your device...</p>
+
+        <div class="btn-group">
+            <a href="index_bigger_screens.html" class="choose-btn" id="btn-desktop">
+                <span class="icon">📖</span>
+                Desktop
+                <span class="label">Flipbook View</span>
+            </a>
+            <a href="index_mobile.html" class="choose-btn" id="btn-mobile">
+                <span class="icon">📱</span>
+                Mobile
+                <span class="label">Single Page View</span>
+            </a>
         </div>
-    </div>
 
-    <div class="book-container">
-        <div class="book">
-            <!-- Book Spine -->
-            <div class="book-spine"></div>
-
-            <!-- Book binding edges (top and bottom) -->
-            <div class="book-binding-top"></div>
-            <div class="book-binding-bottom"></div>
-
-            <!-- Page edges (thickness visible on sides) -->
-            <div class="page-edges page-edges-left"></div>
-            <div class="page-edges page-edges-right"></div>
-
-            <!-- Page Stacks for depth effect -->
-            <div class="page-stack left">
-                <div class="stack-layer"></div>
-                <div class="stack-layer"></div>
-                <div class="stack-layer"></div>
-            </div>
-            <div class="page-stack right">
-                <div class="stack-layer"></div>
-                <div class="stack-layer"></div>
-                <div class="stack-layer"></div>
-            </div>
-
-            <!-- Cover Spread (Page 0) - Single cover page on right -->
-            <div class="page-spread" id="spread-0">
-                <div class="page-half left">
-                    <div class="page" style="background: linear-gradient(135deg, #f5e9d9 0%, #e8d4b0 100%); box-shadow: none;"></div>
-                </div>
-                <div class="page-half right">
-                    <div class="page cover-page">
-                        <h1>Hosea and Gomer</h1>
-                        <div class="subtitle">A Story of Unfailing Love</div>
-                        <div class="author">Created by Samuel Kurian Roy</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spread 1 (Pages 1-2) -->
-            <div class="page-spread hidden" id="spread-1">
-                <div class="page-half left">
-                    <div class="page bg-page" style="background-image: url('Images/1.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>The Prophet's Calling</h2>
-                                <p><span class="drop-cap">T</span>he prophet Hosea lived a quiet life, his days filled with prayer and the study of sacred scrolls. His heart was a still pool, reflecting the heavens. But one day, a voice, deep and resonant as thunder, broke the silence. "Go," it commanded. "Take for yourself a wife of harlotry and have children of harlotry, for the land commits great harlotry by forsaking its God."</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="page-half right">
-                    <div class="page bg-page" style="background-image: url('Images/2.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>Meeting Gomer</h2>
-                                <p><span class="drop-cap">H</span>is steps led him to the city's edge, to a house where laughter spilled like cheap wine. There he found Gomer. She was a flame in the darkness, her eyes holding both a desperate hunger and a deep-seated weariness. When Hosea spoke her name and asked for her hand, she laughed, a sound as brittle as dry leaves. But in his gaze, she saw not judgment, but a strange and steady tenderness. She said yes.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spread 2 (Pages 3-4) -->
-            <div class="page-spread hidden" id="spread-2">
-                <div class="page-half left">
-                    <div class="page bg-page" style="background-image: url('Images/3.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>A Quiet Harbor</h2>
-                                <p><span class="drop-cap">F</span>or a time, Hosea's love was a strange and quiet harbor. A son was born to them, a child of their union, and God commanded he be named Jezreel, for a valley of judgment. This firstborn, Hosea's own son, was a prophecy of sorrow, a shadow falling over their new family. But the quiet of Hosea's home felt like a cage to Gomer, and her eyes began to stray back toward the wild, chaotic life she had known.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="page-half right">
-                    <div class="page bg-page" style="background-image: url('Images/4.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>The First Betrayal</h2>
-                                <p><span class="drop-cap">G</span>omer's restlessness gave way to betrayal. She sought out her old lovers, and soon she bore a daughter, a child not of Hosea's blood. God's voice came again, cold as iron: "Name her Lo-ruhamah, for she is 'Not Pitied,' and I will no longer have pity on my people." The child was a living testament to Gomer's unfaithfulness, a constant pain in Hosea's home.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spread 3 (Pages 5-6) -->
-            <div class="page-spread hidden" id="spread-3">
-                <div class="page-half left">
-                    <div class="page bg-page" style="background-image: url('Images/5.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>Deepening Shame</h2>
-                                <p><span class="drop-cap">T</span>he shame deepened. After weaning her daughter, Gomer bore another son, also not of Hosea's line. The command from God was the final, devastating blow: "Name him Lo-ammi, for he is 'Not My People,' and I am not your God." One night, Gomer vanished, leaving Hosea with his son Jezreel and the two children of her unfaithfulness, a house full of broken covenants.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="page-half right">
-                    <div class="page bg-page" style="background-image: url('Images/6.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>A Spectacle of Shame</h2>
-                                <p><span class="drop-cap">H</span>osea's life became a spectacle of shame. He raised his own son and the two children of Gomer's adultery alone. Their names were a constant sermon to the townspeople who whispered behind his back. Jezreel, Lo-ruhamah, Lo-ammi. Judgment, No Pity, Not My People. Every time he called to them, he preached his own heartbreak and his nation's sin. His love for them was real, but it was a love steeped in grief.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spread 4 (Pages 7-8) -->
-            <div class="page-spread hidden" id="spread-4">
-                <div class="page-half left">
-                    <div class="page bg-page" style="background-image: url('Images/7.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>Years Passed</h2>
-                                <p><span class="drop-cap">Y</span>ears passed. Gomer's beauty, once a burning torch, faded to a guttering wick. The men who had desired her grew tired of her. She fell into debt, her freedom sold to settle her accounts. She became a possession, passed from one master to another, her spirit worn as thin as her ragged clothes.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="page-half right">
-                    <div class="page bg-page" style="background-image: url('Images/8.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>The Second Command</h2>
-                                <p><span class="drop-cap">T</span>hen the voice came to Hosea again, not in thunder, but in a whisper that shook his soul. "Go again, love a woman who is loved by another man and is an adulteress." The command was absurd, impossible. It meant loving the source of his deepest pain. It meant loving Gomer.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spread 5 (Pages 9-10) -->
-            <div class="page-spread hidden" id="spread-5">
-                <div class="page-half left">
-                    <div class="page bg-page" style="background-image: url('Images/9.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>Redemption</h2>
-                                <p><span class="drop-cap">H</span>e found her in the slave market. She stood on the auction block, her head bowed in shame. Hosea stepped forward. "I will buy her," he said, his voice clear and strong. He paid the price—fifteen shekels of silver and a homer and a lethech of barley—the full price for a common slave.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="page-half right">
-                    <div class="page bg-page" style="background-image: url('Images/10.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>Beginning of Healing</h2>
-                                <p><span class="drop-cap">H</span>e brought her home. Not as a slave, but as his wife. He looked at her, at the ruins of the woman he had married, and said, "You must stay with me for many days; you shall not play the harlot, or belong to another man. So I will also be to you." It was not the end of the pain, but the beginning of a long healing. It was a love that refused to let go, a love that bought back what was broken and promised, in the quiet darkness, the hope of a new dawn.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spread 6 (Pages 11-12) -->
-            <div class="page-spread hidden" id="spread-6">
-                <div class="page-half left">
-                    <div class="page bg-page" style="background-image: url('Images/11.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>The Nature of Love</h2>
-                                <div class="scripture">
-                                    Love is patient, love is kind. It does not envy, it does not boast, it is not proud. It does not dishonor others, it is not self-seeking, it is not easily angered, it keeps no record of wrongs. Love does not delight in evil but rejoices with the truth. It always protects, always trusts, always hopes, always perseveres. Love never fails.
-                                </div>
-                                <p>— 1 Corinthians 13:4-8a</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="page-half right">
-                    <div class="page bg-page" style="background-image: url('Images/12.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>What Gomer Deserved</h2>
-                                <p><span class="drop-cap">W</span>hat did Gomer truly deserve? By the law of her people and the word of God, her path should have been walled with thorns. She should have been stripped bare, her shame exposed to the lovers she chased. The grain, the wine, the oil—all the gifts she took for granted—should have been taken away, leaving her like a parched desert, a ruined vineyard. Her feasts should have turned to mourning. This was the judgment for her betrayal, the bitter harvest of her choices.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spread 7 (Pages 13-14) -->
-            <div class="page-spread hidden" id="spread-7">
-                <div class="page-half left">
-                    <div class="page bg-page" style="background-image: url('Images/13.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>The Parallel to Christ</h2>
-                                <p><span class="drop-cap">T</span>his story, etched in the lives of a prophet and his unfaithful wife, is not just about them. It is a mirror reflecting a much larger love story. Hosea, in his unwavering, pursuing love, is a living picture of God. His heart, broken by betrayal, mirrors the grief of a Creator whose people turn away.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="page-half right">
-                    <div class="page bg-page" style="background-image: url('Images/14.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>Humanity's Betrayal</h2>
-                                <p><span class="drop-cap">A</span>nd Gomer, in her restlessness and her constant search for something more, represents humanity. We, too, chase after fleeting pleasures and empty promises, forgetting the source of all true love and provision. We take the gifts of life—the grain, the wine, the oil—and forget the Giver, offering our hearts to lesser things. Our sins are like Gomer's adultery. Each time we choose our own way, we break the heart of God. We wander from the safety of His love, selling ourselves into the slavery of sin, ending up broken and ashamed on an auction block of our own making.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spread 8 (Pages 15-16) -->
-            <div class="page-spread hidden" id="spread-8">
-                <div class="page-half left">
-                    <div class="page bg-page" style="background-image: url('Images/15.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>God's Pursuit</h2>
-                                <p><span class="drop-cap">B</span>ut the story does not end in judgment. Just as Hosea went to the slave market, God, in His infinite mercy, came to find us. He did not wait for us to be worthy. He came to the auction block of our shame and paid the ultimate price to buy us back. Not with silver or barley, but with the precious blood of his Son, Jesus.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="page-half right">
-                    <div class="page bg-page" style="background-image: url('Images/16.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>The Ultimate Price Paid</h2>
-                                <p><span class="drop-cap">G</span>omer was never made to pay the full price for her sin. She deserved to be stripped naked, her shame put on public display. But she was spared. Instead, Jesus, who was without any sin, took her punishment. He was the one stripped of all his clothes, his nakedness exposed to the mocking crowds. He absorbed the shame that was meant for Gomer, the shame that was meant for us.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spread 9 (Pages 17-18) -->
-            <div class="page-spread hidden" id="spread-9">
-                <div class="page-half left">
-                    <div class="page bg-page" style="background-image: url('Images/17.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>The Scourging</h2>
-                                <p><span class="drop-cap">T</span>he law demanded punishment, and the punishment was brutal. Jesus was tied to a post and lashed thirty-nine times, the maximum penalty allowed. The whip was not a simple strap of leather; it was a scourge, tipped with bone and metal, designed to rip and tear. With each strike, flesh was pulled from his body. Blood oozed from countless wounds until his back was a shredded ruin and his rib cage was exposed. He hardly looked human.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="page-half right">
-                    <div class="page bg-page" style="background-image: url('Images/18.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>The Journey to the Cross</h2>
-                                <p><span class="drop-cap">A</span>nd that was only the beginning. In this mangled state, a crossbeam weighing more than fifty kilograms was heaved onto his bleeding shoulders. He was forced to carry it for a kilometer through the city streets. The people he came to save now cursed him, spat on him, and tried to trip him, laughing when he fell. He endured it all for a sin he did not commit.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spread 10 (Pages 19-20) -->
-            <div class="page-spread hidden" id="spread-10">
-                <div class="page-half left">
-                    <div class="page bg-page" style="background-image: url('Images/19.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>The Agony of the Cross</h2>
-                                <p><span class="drop-cap">T</span>he worst suffering was on the cross. Iron spikes were driven through the nerves in his hands and through his feet, pinning him to the wood. To breathe, he had to push his entire body upward, scraping his exposed ribs against the splintered timber. Every single breath was a fresh wave of blinding, searing pain. He hung there for hours, suspended between heaven and earth.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="page-half right">
-                    <div class="page bg-page" style="background-image: url('Images/20.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>The Power of Choice</h2>
-                                <p><span class="drop-cap">Y</span>et, he was not powerless. He is the commander of the angel armies of the Lord. One word from his lips and twelve legions of angels would have descended to wipe the planet clean. But he remained silent. He chose the nails. He chose the pain. He chose to suffer, to endure it all in the name of love, until every last drop of his blood was shed to pay our debt and break the shackles of sin forever.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spread 11 (Pages 21-22) -->
-            <div class="page-spread hidden" id="spread-11">
-                <div class="page-half left">
-                    <div class="page bg-page" style="background-image: url('Images/21.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>Redeeming Love</h2>
-                                <p><span class="drop-cap">T</span>his is the love that bought us back. He brings us home, not as slaves, but as beloved children. He clothes us in righteousness and promises to be with us forever. His is a love that redeems, a love that restores, a love that sees the ruins of our lives and promises to build something beautiful. It is a love that never, ever fails.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="page-half right">
-                    <div class="page bg-page" style="background-image: url('Images/22.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>References and Biblical Sources</h2>
-                                <div class="references">
-                                    <p>The story and theological parallels in this book are drawn from the following sources:</p>
-                                    <ul>
-                                        <li><strong>The Book of Hosea:</strong> Chapters 1, 2, and 3 detail the life of the prophet Hosea and his wife Gomer, their children (Jezreel, Lo-ruhamah, and Lo-ammi), and the command to buy Gomer back from slavery (Hosea 3:2). The punishment Gomer deserved is implied throughout the book, particularly in Hosea 2.</li>
-                                        <li><strong>1 Corinthians 13:4-8a:</strong> The specific verses quoted detailing the nature of love.</li>
-                                        <li><strong>The Gospel of Matthew:</strong> Accounts of the crucifixion and Jesus's statement regarding the angel armies (Matthew 26:53).</li>
-                                        <li><strong>The Gospel of John:</strong> For details of the crucifixion, including the debt payment (John 19:30).</li>
-                                        <li><strong>The Gospel of Luke and Mark:</strong> For accounts of the scourging and the journey to the cross.</li>
-                                        <li><strong>Isaiah 53:5:</strong> References the scourging and Jesus's substitutionary suffering.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spread 12 (Pages 23-24) -->
-            <div class="page-spread hidden" id="spread-12">
-                <div class="page-half left">
-                    <div class="page bg-page" style="background-image: url('Images/23.png');">
-                        <div class="page-content">
-                            <div class="page-text" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                <p style="text-align: center; font-size: 1.2rem; margin-bottom: 15px;">Created by</p>
-                                <p style="text-align: center; font-size: 2rem; font-weight: bold; margin-bottom: 30px;">Samuel Kurian Roy</p>
-                                <p style="text-align: center; font-style: italic; margin-bottom: 20px;">S.D.G.</p>
-                                <p style="text-align: center; font-size: 1rem;">For inquiries: storybookssdg@gmail.com</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="page-half right">
-                    <div class="page bg-page" style="background-image: url('Images/24.png');">
-                        <div class="page-content">
-                            <div class="page-text">
-                                <h2>The End</h2>
-                                <p><span class="drop-cap">T</span>hank you for reading this story of unfailing love. May it remind you of the depth of God's love for each of us, a love that pursues, redeems, and restores.</p>
-                                <div class="divider"></div>
-                                <p>For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.</p>
-                                <p>— John 3:16</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spread 13 (Back Cover) -->
-            <div class="page-spread hidden" id="spread-13">
-                <div class="page-half left">
-                    <div class="page cover-page" style="background: linear-gradient(135deg, #5d4037 0%, #3e2723 100%);">
-                        <h1 style="font-size: 2.5rem;">Hosea and Gomer</h1>
-                        <div class="subtitle" style="font-size: 1.1rem;">A Story of Unfailing Love</div>
-                        <div style="margin-top: 60px; font-size: 1rem; color: #f5e9d9; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);">
-                            <p style="margin-bottom: 15px;">A timeless tale of redemption</p>
-                            <p>Created by Samuel Kurian Roy</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="page-half right">
-                    <div class="page" style="background: linear-gradient(135deg, #f5e9d9 0%, #e8d4b0 100%); box-shadow: none;"></div>
-                </div>
-            </div>
-
-            <!-- Navigation Controls -->
-            <div class="page-nav-menu">
-                <button class="jump-to-page-btn" onclick="togglePageMenu()" title="Jump to Page">
-                    <i class="fas fa-list"></i>
-                </button>
-                <select class="page-select" id="page-selector" onchange="jumpToPage()" style="display: none;">
-                    <option value="0">Cover</option>
-                    <option value="1">Pages 1-2: The Prophet's Calling</option>
-                    <option value="2">Pages 3-4: A Quiet Harbor</option>
-                    <option value="3">Pages 5-6: Deepening Shame</option>
-                    <option value="4">Pages 7-8: Years Passed</option>
-                    <option value="5">Pages 9-10: Redemption</option>
-                    <option value="6">Pages 11-12: The Nature of Love</option>
-                    <option value="7">Pages 13-14: The Parallel</option>
-                    <option value="8">Pages 15-16: God's Pursuit</option>
-                    <option value="9">Pages 17-18: The Scourging</option>
-                    <option value="10">Pages 19-20: The Agony</option>
-                    <option value="11">Pages 21-22: Redeeming Love</option>
-                    <option value="12">Pages 23-24: The End</option>
-                    <option value="13">Back Cover</option>
-                </select>
-            </div>
-
-            <!-- Audio Controls -->
-            <div class="audio-controls">
-                <button class="audio-btn" id="audio-btn" onclick="toggleAudio()" title="Play Audio">
-                    <i class="fas fa-play" id="audio-icon"></i>
-                </button>
-                <button class="audio-btn autoplay-btn" id="autoplay-btn" onclick="toggleAutoplay()" title="Autoplay Enabled">
-                    <span id="autoplay-icon" style="font-weight: bold; font-size: 1.3rem;">A</span>
-                </button>
-                <div class="volume-control">
-                    <i class="fas fa-volume-up volume-icon" id="volume-icon"></i>
-                    <input type="range" min="0" max="100" value="50" class="volume-slider" id="volume-slider" title="Background Music Volume">
-                </div>
-                <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="Mute All Audio">
-                    <i class="fas fa-volume-up" id="mute-icon"></i>
-                </button>
-            </div>
-
-            <!-- Navigation Buttons -->
-            <div class="navigation">
-                <button class="nav-btn" id="prev-btn" onclick="changePage(-1)">
-                    <i class="fas fa-chevron-left"></i> Previous
-                </button>
-                <button class="nav-btn" id="next-btn" onclick="changePage(1)">
-                    Next <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-
-            <!-- Page Indicator -->
-            <div class="page-indicator" id="page-indicator">
-                Spread 1 of 13
-            </div>
+        <div class="auto-redirect" id="auto-redirect">
+            Redirecting to <span id="redirect-target">...</span> in <span id="countdown">3</span>s
         </div>
+        <div class="loading-bar"><div class="fill" id="loading-fill"></div></div>
     </div>
-
-    <!-- Hidden Audio Elements -->
-    <audio id="page-audio" preload="none"></audio>
-    <audio id="background-music" preload="none" loop></audio>
 
     <script>
-        let currentSpread = 0;
-        const totalSpreads = 14;
-        const audioElement = document.getElementById('page-audio');
-        const backgroundMusic = document.getElementById('background-music');
-        let isPlaying = false;
-        let autoplayEnabled = true;
-        let isMuted = false;
-        let previousVolume = 0.5;
-        let pageMenuVisible = false;
-        let autoAdvanceTimer = null;
-        let fadeInterval = null;
-        let musicRestoreTimer = null;
-        let imagesLoaded = false;
+        const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const target = isMobile ? 'index_mobile.html' : 'index_bigger_screens.html';
+        const targetLabel = isMobile ? 'Mobile' : 'Desktop';
 
-        // Preload all images
-        function preloadImages() {
-            const imagesToPreload = [
-                'Cover.png',
-                ...Array.from({length: 24}, (_, i) => `Images/${i + 1}.png`)
-            ];
-            
-            let loadedCount = 0;
-            const totalImages = imagesToPreload.length;
-            const progressBar = document.getElementById('loading-progress');
-            const loadingOverlay = document.getElementById('loading-overlay');
-            
-            const updateProgress = () => {
-                const progress = (loadedCount / totalImages) * 100;
-                if (progressBar) {
-                    progressBar.style.width = `${progress}%`;
-                }
-                
-                if (loadedCount === totalImages) {
-                    imagesLoaded = true;
-                    setTimeout(() => {
-                        if (loadingOverlay) {
-                            loadingOverlay.classList.add('hidden');
-                        }
-                    }, 300);
-                }
-            };
-            
-            imagesToPreload.forEach(src => {
-                const img = new Image();
-                img.onload = () => {
-                    loadedCount++;
-                    updateProgress();
-                };
-                img.onerror = () => {
-                    loadedCount++;
-                    updateProgress();
-                };
-                img.src = src;
-            });
-        }
+        document.getElementById('auto-msg').textContent = `${targetLabel} display detected`;
+        document.getElementById('redirect-target').textContent = targetLabel;
 
-        // Start preloading immediately
-        preloadImages();
+        // Highlight the detected button
+        const activeBtn = isMobile ? document.getElementById('btn-mobile') : document.getElementById('btn-desktop');
+        activeBtn.style.borderColor = '#c48c46';
+        activeBtn.style.background = 'rgba(196, 140, 70, 0.15)';
 
-        // Update book position based on current spread
-        function updateBookPosition(spreadNum) {
-            const bookElement = document.querySelector('.book');
-            
-            // Remove all position classes
-            bookElement.classList.remove('position-center', 'position-left', 'position-right');
-            
-            // Add appropriate class based on spread
-            if (spreadNum === 0) {
-                // Cover page - shift left to center the right-side cover
-                bookElement.classList.add('position-left');
-            } else if (spreadNum === totalSpreads - 1) {
-                // Last spread - shift right to show the left page
-                bookElement.classList.add('position-right');
-            } else {
-                // Middle spreads - keep centered to show both pages
-                bookElement.classList.add('position-center');
-            }
-        }
-
-        // Map spreads to individual page numbers for audio
-        const spreadToPages = {
-            0: [0],
-            1: [1, 2],
-            2: [3, 4],
-            3: [5, 6],
-            4: [7, 8],
-            5: [9, 10],
-            6: [11, 12],
-            7: [13, 14],
-            8: [15, 16],
-            9: [17, 18],
-            10: [19, 20],
-            11: [21, 22],
-            12: [23, 24]
-        };
-
-        const pagesWithAudio = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 24];
-        
-        const audioDurations = {
-            1: 25.913438, 2: 24.476688, 3: 31.947750, 4: 29.753438,
-            5: 23.484063, 6: 25.338750, 7: 18.337938, 8: 23.719125,
-            9: 23.719125, 10: 37.694688, 11: 36.963250, 12: 35.892188,
-            13: 23.771375, 14: 45.688125, 15: 27.820375, 16: 30.458750,
-            17: 34.690563, 18: 27.768125, 19: 30.876688, 20: 32.000000,
-            21: 27.480813, 24: 26.174688
-        };
-
-        function togglePageMenu() {
-            const pageSelector = document.getElementById('page-selector');
-            pageMenuVisible = !pageMenuVisible;
-            pageSelector.style.display = pageMenuVisible ? 'block' : 'none';
-            if (pageMenuVisible) {
-                pageSelector.value = currentSpread;
-                setTimeout(() => pageSelector.focus(), 100);
-            }
-        }
-
-        function jumpToPage() {
-            const pageSelector = document.getElementById('page-selector');
-            const selectedSpread = parseInt(pageSelector.value);
-            if (selectedSpread !== currentSpread && selectedSpread >= 0 && selectedSpread < totalSpreads) {
-                const direction = selectedSpread > currentSpread ? 1 : -1;
-                showSpread(selectedSpread, direction);
-                currentSpread = selectedSpread;
-            }
-            pageMenuVisible = false;
-            pageSelector.style.display = 'none';
-        }
-
-        function fadeOutMusic(callback) {
-            const currentVolume = backgroundMusic.volume;
-            if (currentVolume <= 0.01) {
-                backgroundMusic.volume = 0;
-                if (callback) callback();
-                return;
-            }
-            let volume = currentVolume;
-            clearInterval(fadeInterval);
-            fadeInterval = setInterval(() => {
-                volume -= 0.05;
-                if (volume <= 0) {
-                    backgroundMusic.volume = 0;
-                    clearInterval(fadeInterval);
-                    if (callback) callback();
-                } else {
-                    backgroundMusic.volume = volume;
-                }
-            }, 50);
-        }
-
-        function fadeInMusic(targetVolumeOverride = null) {
-            const volumeSliderValue = parseInt(document.getElementById('volume-slider').value);
-            const targetVolume = targetVolumeOverride !== null ? targetVolumeOverride : (isMuted ? 0 : (volumeSliderValue / 100));
-            if (targetVolume === 0) {
-                backgroundMusic.volume = 0;
-                return;
-            }
-            backgroundMusic.volume = 0;
-            let volume = 0;
-            clearInterval(fadeInterval);
-            fadeInterval = setInterval(() => {
-                volume += 0.05;
-                if (volume >= targetVolume) {
-                    backgroundMusic.volume = targetVolume;
-                    clearInterval(fadeInterval);
-                } else {
-                    backgroundMusic.volume = volume;
-                }
-            }, 50);
-        }
-
-        function duckBackgroundMusic() {
-            if (backgroundMusic.paused || isMuted) return;
-            const currentVolume = backgroundMusic.volume;
-            const targetVolume = currentVolume * 0.15;
-            let volume = currentVolume;
-            clearInterval(fadeInterval);
-            fadeInterval = setInterval(() => {
-                volume -= 0.03;
-                if (volume <= targetVolume) {
-                    backgroundMusic.volume = targetVolume;
-                    clearInterval(fadeInterval);
-                } else {
-                    backgroundMusic.volume = volume;
-                }
-            }, 50);
-        }
-
-        function restoreBackgroundMusic() {
-            if (backgroundMusic.paused || isMuted) return;
-            const volumeSliderValue = parseInt(document.getElementById('volume-slider').value);
-            const targetVolume = volumeSliderValue / 100;
-            let volume = backgroundMusic.volume;
-            clearInterval(fadeInterval);
-            fadeInterval = setInterval(() => {
-                volume += 0.03;
-                if (volume >= targetVolume) {
-                    backgroundMusic.volume = targetVolume;
-                    clearInterval(fadeInterval);
-                } else {
-                    backgroundMusic.volume = volume;
-                }
-            }, 50);
-        }
-
-        function handleBackgroundMusic(spreadNum) {
-            const pages = spreadToPages[spreadNum] || [];
-            const firstPage = pages[0] || 0;
-            let songToPlay = '';
-            
-            if (firstPage >= 0 && firstPage <= 3) {
-                songToPlay = 'Songs/Part_1.mp3';
-            } else if (firstPage >= 4 && firstPage <= 8) {
-                songToPlay = 'Songs/Part_2.mp3';
-            } else if (firstPage >= 9 && firstPage <= 11) {
-                songToPlay = 'Songs/Part_3.mp3';
-            } else if (firstPage >= 12 && firstPage <= 14) {
-                songToPlay = 'Songs/Part_4.mp3';
-            } else if (firstPage >= 15 && firstPage <= 17) {
-                songToPlay = 'Songs/Part_5.mp3';
-            } else if (firstPage >= 18 && firstPage <= 23) {
-                songToPlay = 'Songs/Part_6.mp3';
-            }
-            
-            const currentSong = backgroundMusic.src ? backgroundMusic.src.split('/').pop().split('?')[0] : '';
-            const newSong = songToPlay ? songToPlay.split('/').pop().split('?')[0] : '';
-            
-            if (songToPlay && currentSong !== newSong) {
-                if (musicRestoreTimer) {
-                    clearTimeout(musicRestoreTimer);
-                    musicRestoreTimer = null;
-                }
-                backgroundMusic.pause();
-                backgroundMusic.src = songToPlay;
-                backgroundMusic.currentTime = 0;
-                backgroundMusic.volume = 0;
-                backgroundMusic.play().then(() => {
-                    if (isPlaying) {
-                        const volumeSliderValue = parseInt(document.getElementById('volume-slider').value);
-                        const targetVolume = (volumeSliderValue / 100) * 0.15;
-                        fadeInMusic(targetVolume);
-                    } else {
-                        fadeInMusic();
-                    }
-                }).catch(() => {});
-            } else if (songToPlay && backgroundMusic.paused) {
-                backgroundMusic.play().then(() => {
-                    fadeInMusic();
-                }).catch(() => {});
-            } else if (!songToPlay) {
-                fadeOutMusic(() => {
-                    backgroundMusic.pause();
-                    backgroundMusic.currentTime = 0;
-                });
-            }
-        }
-
-        function loadAudio(spreadNum) {
-            if (autoAdvanceTimer) {
-                clearTimeout(autoAdvanceTimer);
-                autoAdvanceTimer = null;
-            }
-            if (musicRestoreTimer) {
-                clearTimeout(musicRestoreTimer);
-                musicRestoreTimer = null;
-            }
-
-            audioElement.pause();
-            audioElement.currentTime = 0;
-            isPlaying = false;
-            updateAudioButton();
-
-            const pages = spreadToPages[spreadNum] || [];
-            const audioPage = pages.find(p => pagesWithAudio.includes(p));
-
-            if (audioPage) {
-                audioElement.src = `Audio/${audioPage}.mp3`;
-                document.getElementById('audio-btn').disabled = false;
-                
-                if (autoplayEnabled) {
-                    audioElement.play().then(() => {
-                        isPlaying = true;
-                        duckBackgroundMusic();
-                        const duration = audioDurations[audioPage];
-                        if (duration) {
-                            if (musicRestoreTimer) clearTimeout(musicRestoreTimer);
-                            const restoreTime = Math.max(0, (duration - 2)) * 1000;
-                            musicRestoreTimer = setTimeout(() => {
-                                restoreBackgroundMusic();
-                            }, restoreTime);
-                        }
-                        updateAudioButton();
-                    }).catch(() => {
-                        isPlaying = false;
-                        updateAudioButton();
-                    });
-                }
-            } else {
-                audioElement.src = '';
-                document.getElementById('audio-btn').disabled = true;
-                
-                if (autoplayEnabled && (spreadNum === 11 || spreadNum === 12)) {
-                    autoAdvanceTimer = setTimeout(() => {
-                        if (currentSpread < totalSpreads - 1) {
-                            changePage(1);
-                        }
-                    }, 15000);
-                }
-            }
-            updateAudioButton();
-        }
-
-        function toggleAudio() {
-            if (isPlaying) {
-                audioElement.pause();
-                isPlaying = false;
-                if (musicRestoreTimer) clearTimeout(musicRestoreTimer);
-                restoreBackgroundMusic();
-            } else {
-                audioElement.play().then(() => {
-                    isPlaying = true;
-                    duckBackgroundMusic();
-                    const pages = spreadToPages[currentSpread] || [];
-                    const audioPage = pages.find(p => pagesWithAudio.includes(p));
-                    const duration = audioDurations[audioPage];
-                    if (duration) {
-                        if (musicRestoreTimer) clearTimeout(musicRestoreTimer);
-                        const restoreTime = Math.max(0, (duration - 2)) * 1000;
-                        musicRestoreTimer = setTimeout(() => {
-                            restoreBackgroundMusic();
-                        }, restoreTime);
-                    }
-                    updateAudioButton();
-                }).catch(() => {
-                    isPlaying = false;
-                    updateAudioButton();
-                });
-            }
-            updateAudioButton();
-        }
-
-        function updateAudioButton() {
-            const audioBtn = document.getElementById('audio-btn');
-            const audioIcon = document.getElementById('audio-icon');
-            if (isPlaying) {
-                audioIcon.className = 'fas fa-pause';
-                audioBtn.classList.add('playing');
-                audioBtn.title = 'Pause Audio';
-            } else {
-                audioIcon.className = 'fas fa-play';
-                audioBtn.classList.remove('playing');
-                audioBtn.title = 'Play Audio';
-            }
-        }
-
-        function toggleAutoplay() {
-            autoplayEnabled = !autoplayEnabled;
-            const autoplayBtn = document.getElementById('autoplay-btn');
-            const autoplayIcon = document.getElementById('autoplay-icon');
-            if (autoplayEnabled) {
-                autoplayIcon.style.textDecoration = 'none';
-                autoplayBtn.classList.remove('disabled');
-                autoplayBtn.title = 'Autoplay Enabled';
-            } else {
-                autoplayIcon.style.textDecoration = 'line-through';
-                autoplayBtn.classList.add('disabled');
-                autoplayBtn.title = 'Autoplay Disabled';
-            }
-        }
-
-        function toggleMute() {
-            isMuted = !isMuted;
-            const volumeSlider = document.getElementById('volume-slider');
-            const volumeIcon = document.getElementById('volume-icon');
-            const muteBtn = document.getElementById('mute-btn');
-            const muteIcon = document.getElementById('mute-icon');
-            
-            if (isMuted) {
-                previousVolume = backgroundMusic.volume;
-                backgroundMusic.volume = 0;
-                audioElement.volume = 0;
-                volumeSlider.value = 0;
-                volumeIcon.className = 'fas fa-volume-mute volume-icon';
-                muteIcon.className = 'fas fa-volume-mute';
-                muteBtn.classList.add('muted');
-                muteBtn.title = 'Unmute All Audio';
-            } else {
-                backgroundMusic.volume = previousVolume;
-                audioElement.volume = 1;
-                volumeSlider.value = previousVolume * 100;
-                muteIcon.className = 'fas fa-volume-up';
-                muteBtn.classList.remove('muted');
-                muteBtn.title = 'Mute All Audio';
-                if (previousVolume < 0.5) {
-                    volumeIcon.className = 'fas fa-volume-down volume-icon';
-                } else {
-                    volumeIcon.className = 'fas fa-volume-up volume-icon';
-                }
-            }
-        }
-
-        document.getElementById('volume-slider').addEventListener('input', function() {
-            const volume = this.value / 100;
-            backgroundMusic.volume = volume;
-            previousVolume = volume;
-            const volumeIcon = document.getElementById('volume-icon');
-            if (volume === 0) {
-                volumeIcon.className = 'fas fa-volume-mute volume-icon';
-            } else if (volume < 0.5) {
-                volumeIcon.className = 'fas fa-volume-down volume-icon';
-            } else {
-                volumeIcon.className = 'fas fa-volume-up volume-icon';
-            }
-            if (volume > 0 && isMuted) {
-                isMuted = false;
-                document.getElementById('mute-btn').classList.remove('muted');
-                document.getElementById('mute-icon').className = 'fas fa-volume-up';
-            }
+        // Start loading bar animation
+        requestAnimationFrame(() => {
+            document.getElementById('loading-fill').style.width = '100%';
         });
 
-        backgroundMusic.volume = 0.5;
-
-        audioElement.addEventListener('ended', () => {
-            isPlaying = false;
-            updateAudioButton();
-            if (musicRestoreTimer) clearTimeout(musicRestoreTimer);
-            if (currentSpread < totalSpreads - 1) {
-                setTimeout(() => {
-                    changePage(1);
-                }, 500);
+        // Countdown and auto-redirect
+        let count = 3;
+        const countdownEl = document.getElementById('countdown');
+        const interval = setInterval(() => {
+            count--;
+            countdownEl.textContent = count;
+            if (count <= 0) {
+                clearInterval(interval);
+                window.location.href = target;
             }
-        });
+        }, 1000);
 
-        function showSpread(spreadNum, direction = 0) {
-            const allSpreads = document.querySelectorAll('.page-spread');
-            const currentSpreadElement = document.getElementById(`spread-${currentSpread}`);
-            const targetSpreadElement = document.getElementById(`spread-${spreadNum}`);
-            const bookElement = document.querySelector('.book');
-
-            // Toggle cover state for spine visibility
-            if (spreadNum === 0) {
-                bookElement.classList.add('on-cover');
-            } else {
-                bookElement.classList.remove('on-cover');
-            }
-
-            // Update book position based on spread
-            updateBookPosition(spreadNum);
-
-            if (direction !== 0 && currentSpreadElement && targetSpreadElement) {
-                if (direction > 0) {
-                    // Prepare next spread (make visible but behind)
-                    targetSpreadElement.classList.remove('hidden');
-                    targetSpreadElement.style.zIndex = '1';
-                    
-                    // Turn page forward
-                    const rightPage = currentSpreadElement.querySelector('.page-half.right');
-                    if (rightPage) {
-                        // Force a reflow to ensure the page is visible
-                        void targetSpreadElement.offsetWidth;
-                        
-                        rightPage.classList.add('turning-forward');
-                        setTimeout(() => {
-                            rightPage.classList.remove('turning-forward');
-                            rightPage.classList.add('flipped');
-                            currentSpreadElement.classList.add('hidden');
-                            currentSpreadElement.style.zIndex = '';
-                            targetSpreadElement.style.zIndex = '';
-                        }, 1200);
-                    }
-                } else {
-                    // Turn page backward
-                    targetSpreadElement.classList.remove('hidden');
-                    const rightPage = targetSpreadElement.querySelector('.page-half.right');
-                    if (rightPage) {
-                        rightPage.classList.add('flipped');
-                        // Force reflow
-                        void rightPage.offsetWidth;
-                        
-                        requestAnimationFrame(() => {
-                            rightPage.classList.add('turning-backward');
-                        });
-                        
-                        setTimeout(() => {
-                            rightPage.classList.remove('turning-backward', 'flipped');
-                            currentSpreadElement.classList.add('hidden');
-                        }, 1200);
-                    }
-                }
-            } else {
-                // Direct jump without animation
-                allSpreads.forEach((spread, index) => {
-                    if (index === spreadNum) {
-                        spread.classList.remove('hidden');
-                    } else {
-                        spread.classList.add('hidden');
-                    }
-                });
-            }
-
-            // Update UI
-            const pageText = spreadNum === 0 ? 'Cover' : `Spread ${spreadNum + 1} of ${totalSpreads}`;
-            document.getElementById('page-indicator').textContent = pageText;
-            document.getElementById('prev-btn').disabled = spreadNum === 0;
-            document.getElementById('next-btn').disabled = spreadNum === totalSpreads - 1;
-
-            // Load audio and background music
-            loadAudio(spreadNum);
-            if (direction === 0) {
-                handleBackgroundMusic(spreadNum);
-            }
-        }
-
-        function changePage(direction) {
-            const newSpread = currentSpread + direction;
-            if (newSpread >= 0 && newSpread < totalSpreads) {
-                handleBackgroundMusic(newSpread);
-                showSpread(newSpread, direction);
-                currentSpread = newSpread;
-                
-                if (currentSpread >= 1 && backgroundMusic.paused) {
-                    backgroundMusic.play().catch(() => {});
-                }
-            }
-        }
-
-        // Initialize
-        showSpread(currentSpread);
-
-        // Keyboard navigation
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'ArrowLeft') {
-                changePage(-1);
-            } else if (event.key === 'ArrowRight') {
-                changePage(1);
-            }
-        });
-
-        // Touch/swipe support
-        let touchStartX = 0;
-        let touchEndX = 0;
-
-        document.addEventListener('touchstart', function(event) {
-            touchStartX = event.changedTouches[0].screenX;
-        });
-
-        document.addEventListener('touchend', function(event) {
-            touchEndX = event.changedTouches[0].screenX;
-            if (touchEndX < touchStartX - 50) {
-                changePage(1);
-            }
-            if (touchEndX > touchStartX + 50) {
-                changePage(-1);
-            }
+        // Cancel auto-redirect on any click
+        document.querySelectorAll('.choose-btn').forEach(btn => {
+            btn.addEventListener('click', () => clearInterval(interval));
         });
     </script>
 </body>
